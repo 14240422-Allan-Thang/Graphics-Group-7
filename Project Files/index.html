@@ -59,7 +59,7 @@
             // resize
             window.addEventListener('resize', function() {
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                camer.aspect = window.innerWidth, window.innerHeight;
+                camera.aspect = window.innerWidth, window.innerHeight;
                 camera.updateProjectionMatrix();
             });
 
@@ -72,20 +72,52 @@
             
             // geometry
             var plane_geometry = new THREE.PlaneGeometry(10, 10);
-            var plane_material = new THREE.MeshBasicMaterial ({
-                color: new THREE.Color(0x0000ff),
-                transparent: false,
-                opacity: 0.85,
-                side: THREE.DoubleSide,
-            })
-            plane = new THREE.Mesh(plane_geometry, plane_material);
-            scene.add(plane);
+            // var plane_material = new THREE.MeshBasicMaterial ({
+            //     color: new THREE.Color(0x0000ff),
+            //     transparent: false,
+            //     opacity: 0.85,
+            //     side: THREE.DoubleSide,
+            // })
+            // plane = new THREE.Mesh(plane_geometry, plane_material);
+            // scene.add(plane);
 
+            CreateBoard();
+
+            //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
 
             //axes. uncomment below line to show axes
             scene.add(new THREE.AxesHelper(20));
 
+            var string = "1. e4 Nf6 2. f3 e5";
+            pgn = StorePGN(string);
+
+            StartGame(pgn);
+
+        }
+
+        function CreateBoard() {
+            var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
+            var blackTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0x000000)});
+            var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0xffffff)});
+
+            board = new THREE.Group();
+
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    var tile;
+                    if (j % 2) {
+                        tile = new THREE.Mesh(tileGeometry, i % 2 ? blackTileMaterial : whiteTileMaterial);
+                    }
+                    else {
+                        tile = new THREE.Mesh(tileGeometry, i % 2 ? whiteTileMaterial : blackTileMaterial);
+                    }
+                    tile.position.set(i, 0, j);
+                    board.add(tile);
+                }
+            }
+            
+            scene.add(board);
         }
 
         // animation loop
@@ -94,7 +126,26 @@
             controls.update();
             requestAnimationFrame(animate);
         }
-        
+
+        function StorePGN(pgn) {
+            // "1. e4 Nf6 2. f3 e5" becomes [1., e4, Nf6, 2., f3, e5]
+            var moveArray;
+            moveArray = pgn.split(/\s+/);
+            return moveArray;
+        }
+
+        function StartGame(pgnArray) {
+            for (var i = 0; i < pgnArray.length; i++) {
+                // ignore the 1., 2. elements
+                if (i % 3 == 0|| i == 0) continue;
+
+                MovePiece(pgnArray[i]);
+            }
+        }
+
+        function MovePiece(command) {
+            return;
+        }
     </script>
 </body>
 </html>
