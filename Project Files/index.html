@@ -158,6 +158,9 @@
                 // Handle Check
                 // Find King
                 // Highlight King Tile
+                // Remove '+'
+                // Call CheckCommand again
+                // Return
                 console.log("Check");
             }
             else if (command.includes('#')) {
@@ -165,36 +168,64 @@
                 // Find King
                 // Highlight King Tile
                 // New Text for checkmate
+                // Remove '#'
+                // Call CheckCommand again
+                // Return
                 console.log("Checkmate");
             }
             
             if (command.includes("0-0-0")) {
                 // Handle Castle Queen
-                // Find 
+                // Find King
+                // if white
+                // Move King 2 Left
+                // Find Rook
+                // Move Rook 3 Right
+                // Return
                 console.log("Queen side Castle");
             }
             else if (command.includes("0-0")) {
                 // Handle Castle King
+                // Find King
+                // if white
+                // Move King 2 Right
+                // Find Rook
+                // Move Rook 2 Left
+                // Return
                 console.log("King Side Castle");
             }
 
             if (command.includes('=')) {
                 // Handle Promote Pawn
+                // Remove Pawn
+                // Add new Piece depending on last letter
+                // Remove '='
+                // Call CheckCommand again
+                // Return
                 console.log("Pawn promoted");
             }
             
             if (command.includes('x')) {
                 // Handle Takes
+                // Remove Piece at pos of last 2 char
+                // Remove 'x'
+                // Call CheckCommand again
                 console.log("Piece Taken");
             }
 
-            LookForPiece(command, colour);
+            var destx;
+            var desty;
+
+            var target = LookForPiece(command, colour);
+            
                 // do something
             // if doesn't contain, only move piece 
             // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
                 // Look for piece
             // if doesn't contain, move pawn
             // if pawn takes empty tile, remove pawn in tile below white/above black
+
+            MovePiece(target, destx, desty);
             return;
         }
 
@@ -250,7 +281,7 @@
             return;
         }
 
-        function MovePiece() {
+        function MovePiece(target, destinationX, destinationY) {
             // Move a piece, don't need to return anything;
             return;
         }
