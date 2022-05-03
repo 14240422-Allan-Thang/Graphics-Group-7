@@ -144,25 +144,33 @@
         function StartGame(pgnArray) {
             for (var i = 0; i < pgnArray.length; i++) {
                 // ignore the 1., 2. elements
+                var colour = "white";
                 if (i % 3 == 0|| i == 0) continue;
 
-                // CheckCommand(pgnArray[i]);
+                // CheckCommand(pgnArray[i], colour);
+                colour = (colour == "white") ? "black": "white";
             }
         }
 
-        function CheckCommand(command) {
+        function CheckCommand(command, colour) {
             // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
             if (command.includes('+')) {
                 // Handle Check
+                // Find King
+                // Highlight King Tile
                 console.log("Check");
             }
             else if (command.includes('#')) {
                 // Handle Checkmate
+                // Find King
+                // Highlight King Tile
+                // New Text for checkmate
                 console.log("Checkmate");
             }
             
             if (command.includes("0-0-0")) {
                 // Handle Castle Queen
+                // Find 
                 console.log("Queen side Castle");
             }
             else if (command.includes("0-0")) {
@@ -180,7 +188,7 @@
                 console.log("Piece Taken");
             }
 
-            LookForPiece(command);
+            LookForPiece(command, colour);
                 // do something
             // if doesn't contain, only move piece 
             // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
@@ -191,53 +199,53 @@
         }
 
         // Change this if you find a better way.
-        function LookForPiece(command) {
+        function LookForPiece(command, colour) {
             if (!command.includes('x')) {
                 if (command.includes('N')) {
-                    FindKnight();
+                    FindKnight(command, colour);
                 }
                 else if (command.includes('B')) {
-                    FindBishop();
+                    FindBishop(command, colour);
                 }
                 else if (command.includes('R')) {
-                    FindRook();
+                    FindRook(command, colour);
                 }
                 else if (command.includes('Q')) {
-                    FindQueen();
+                    FindQueen(command, colour);
                 }
                 else if (command.includes('K')) {
-                    FindKing();
+                    FindKing(command, colour);
                 }
             }
             FindPawn()
         }
 
-        function FindKnight(command) {
+        function FindKnight(command, colour) {
             // Find and return the Knight to move
             return;
         }
 
-        function FindBishop(command) {
+        function FindBishop(command, colour) {
             // Find and return the Bishop to move
             return;
         }
 
-        function FindRook(command) {
+        function FindRook(command, colour) {
             // Find and return the Rook to move
             return;
         }
         
-        function FindQueen(command) {
+        function FindQueen(command, colour) {
             // Find and return the Queen to move
             return;
         }
 
-        function FindKing(command) {
+        function FindKing(command, colour) {
             // Find and return the King to move
             return;
         }
 
-        function FindPawn(command) {
+        function FindPawn(command, colour) {
             // Find and return the Pawn to move
             return;
         }
