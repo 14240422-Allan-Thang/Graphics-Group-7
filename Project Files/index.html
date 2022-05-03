@@ -188,13 +188,16 @@
                 console.log("Piece Taken");
             }
 
-            LookForPiece(command, colour);
+            var target = LookForPiece(command, colour);
+            var destX;
+            var destY; 
                 // do something
             // if doesn't contain, only move piece 
             // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
                 // Look for piece
             // if doesn't contain, move pawn
             // if pawn takes empty tile, remove pawn in tile below white/above black
+            MovePiece(target, destX, destY);
             return;
         }
 
@@ -250,7 +253,7 @@
             return;
         }
 
-        function MovePiece() {
+        function MovePiece(target, destinationX, destinationY) {
             // Move a piece, don't need to return anything;
             return;
         }
