@@ -213,8 +213,10 @@
                 console.log("Piece Taken");
             }
 
-            var destx;
-            var desty;
+            // ReadBasicCommand(command, colour);
+
+            var destX;
+            var destY;
 
             var target = LookForPiece(command, colour);
             
@@ -226,6 +228,26 @@
             // if pawn takes empty tile, remove pawn in tile below white/above black
 
             MovePiece(target, destx, desty);
+            return;
+        }
+
+        function ReadBasicCommand(command, colour) {
+            // destX = 2nd last char
+            // destY = last char
+
+            // if 2 char -- e4
+                // Look for Pawn
+                // Move Pawn to destination
+                // MovePawn(LookForPiece(command, colour), destX, destY);
+            // if 3 char -- Qe4
+                // Look for piece of type 1st char
+                // Move piece to desination
+            // if 4 char -- Qde4/Q3e4
+                // Look for piece of type 1st char on 2nd char rank/file
+                // Move piece to destination
+            // if 5 char -- Qd3e4
+                // Look for piece at position (2nd, 3rd)
+                // Move piece to destination  
             return;
         }
 
