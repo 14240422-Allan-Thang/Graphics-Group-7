@@ -89,7 +89,9 @@
             //axes. uncomment below line to show axes
             scene.add(new THREE.AxesHelper(20));
 
-            var string = "1. e4 Nf6 2. f3 e5";
+            var string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#";
+            var KasparovVsTopalov = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#"
+
             pgn = StorePGN(string);
 
             StartGame(pgn);
@@ -120,6 +122,11 @@
             scene.add(board);
         }
 
+        function AddPiece(pos) {
+            // Create piece, add to scene, shoudln't need to return anything.
+            return;
+        }
+
         // animation loop
         function animate() {
             renderer.render(scene, camera);
@@ -139,13 +146,107 @@
                 // ignore the 1., 2. elements
                 if (i % 3 == 0|| i == 0) continue;
 
-                MovePiece(pgnArray[i]);
+                // CheckCommand(pgnArray[i]);
             }
         }
 
-        function MovePiece(command) {
+        function CheckCommand(command) {
+            // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
+            if (command.includes('+')) {
+                // Handle Check
+                console.log("Check");
+            }
+            else if (command.includes('#')) {
+                // Handle Checkmate
+                console.log("Checkmate");
+            }
+            
+            if (command.includes("0-0-0")) {
+                // Handle Castle Queen
+                console.log("Queen side Castle");
+            }
+            else if (command.includes("0-0")) {
+                // Handle Castle King
+                console.log("King Side Castle");
+            }
+
+            if (command.includes('=')) {
+                // Handle Promote Pawn
+                console.log("Pawn promoted");
+            }
+            
+            if (command.includes('x')) {
+                // Handle Takes
+                console.log("Piece Taken");
+            }
+
+            LookForPiece(command);
+                // do something
+            // if doesn't contain, only move piece 
+            // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
+                // Look for piece
+            // if doesn't contain, move pawn
+            // if pawn takes empty tile, remove pawn in tile below white/above black
             return;
         }
+
+        // Change this if you find a better way.
+        function LookForPiece(command) {
+            if (!command.includes('x')) {
+                if (command.includes('N')) {
+                    FindKnight();
+                }
+                else if (command.includes('B')) {
+                    FindBishop();
+                }
+                else if (command.includes('R')) {
+                    FindRook();
+                }
+                else if (command.includes('Q')) {
+                    FindQueen();
+                }
+                else if (command.includes('K')) {
+                    FindKing();
+                }
+            }
+            FindPawn()
+        }
+
+        function FindKnight(command) {
+            // Find and return the Knight to move
+            return;
+        }
+
+        function FindBishop(command) {
+            // Find and return the Bishop to move
+            return;
+        }
+
+        function FindRook(command) {
+            // Find and return the Rook to move
+            return;
+        }
+        
+        function FindQueen(command) {
+            // Find and return the Queen to move
+            return;
+        }
+
+        function FindKing(command) {
+            // Find and return the King to move
+            return;
+        }
+
+        function FindPawn(command) {
+            // Find and return the Pawn to move
+            return;
+        }
+
+        function MovePiece() {
+            // Move a piece, don't need to return anything;
+            return;
+        }
+
     </script>
 </body>
 </html>
