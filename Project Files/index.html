@@ -36,6 +36,7 @@
     <script>
         
         var scene, camera, renderer;
+        var board;
 
         init();
         animate();
@@ -65,7 +66,7 @@
 
             // lights
             var light = new THREE.PointLight(new THREE.Color(1,1,1), 0.5);
-            camera.add(light)
+            camera.add(light);
             scene.add(light);
 
             // ambient
@@ -82,18 +83,18 @@
             // scene.add(plane);
 
             CreateBoard();
-
+            
             //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
 
             //axes. uncomment below line to show axes
             scene.add(new THREE.AxesHelper(20));
-
+            
             var string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#";
             var KasparovVsTopalov = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#"
-
+            
             pgn = StorePGN(string);
-
+            
             StartGame(pgn);
 
         }
@@ -103,23 +104,143 @@
             var blackTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0x000000)});
             var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0xffffff)});
 
-            board = new THREE.Group();
+            const Board = {
+                tilemap: [],
+            };
+
+            board = Board;
+            board.tilemap = new Array(8);
+            for (let i = 0; i < 8; i++) {
+                board.tilemap[i] = new Array(8);
+            }
+
+            class Tile {
+                constructor(file, rank) {
+                    this.file = file;
+                    this.rank = rank;
+                    this.colour;
+                    this.piece;
+                    this.mesh;
+                }
+                getColour() {
+                    return this.colour;
+                }
+                setColour(value) {
+                    this.colour = value;
+                }
+                getRank() {
+                    return this.rank;
+                }
+                setRank(value) {
+                    this.rank = value;
+                }
+                getFile() {
+                    return this.file;
+                }
+                setFile(value) {
+                    this.file = value;
+                }
+                getPiece() {
+                    return this.piece;
+                }
+                setPiece(value) {
+                    this.piece = value;
+                }
+                getMesh() {
+                    return this.mesh;
+                }
+                setMesh(value) {
+                    this.mesh = value;
+                }
+            }
+
+            class Piece {
+                constructor(type, tile) {
+                    this.type = type;
+                    this.tile = tile;
+                    this.colour;
+                    this.mesh;
+                }
+                getType() {
+                    return this.type;
+                }
+                getTile() {
+                    return this.tile;
+                }
+                setTile(value) {
+                    this.tile = value;
+                }
+                getColour() {
+                    return this.colour;
+                }
+                setColour(value) {
+                    this.colour = value;
+                }
+                getMesh() {
+                    return this.mesh;
+                }
+                setMesh(value) {
+                    this.mesh = value;
+                }
+            }
+
+            class TakenPieces {
+                constructor(colour) {
+                    this.colour = colour;
+                    this.pieces = [];
+                }
+                getPieces() {
+                    return this.pieces;
+                }
+                setPieces(value) {
+                    this.pieces = value;
+                }
+                addPiece(value) {
+                    this.pieces.push(value);
+                }
+            }
 
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
-                    var tile;
+                    let tile = new Tile(PosToFile(i), PosToRank(j));
+                    var colour;
                     if (j % 2) {
-                        tile = new THREE.Mesh(tileGeometry, i % 2 ? blackTileMaterial : whiteTileMaterial);
+                        colour = (i % 2) ? "black" : "white";
+                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("black") ? blackTileMaterial : whiteTileMaterial));
                     }
                     else {
-                        tile = new THREE.Mesh(tileGeometry, i % 2 ? whiteTileMaterial : blackTileMaterial);
+                        colour = (i % 2) ? "white" : "black";
+                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("white") ? whiteTileMaterial : blackTileMaterial));
                     }
-                    tile.position.set(i, 0, j);
-                    board.add(tile);
+                    tile.getMesh().position.set(i, 0, j);
+                    // FindTile(currentFile, currentRank).getPiece().tile = FindTile(newFile, newRank);
+                    tile.setColour(colour);
+                    board.tilemap[i][j] = tile;
+                    scene.add(tile.getMesh());
                 }
             }
-            
-            scene.add(board);
+        }
+
+        function RankToPos(rank) {
+            var ranks = ['a','b','c','d','e','f','g','h'];
+            return ranks.indexOf(rank);
+        }
+
+        function FileToPos(file) {
+            return --file;
+        }
+
+        function PosToRank(pos) {
+            var ranks = ['a','b','c','d','e','f','g','h'];
+            return ranks[pos];
+        }
+
+        function PosToFile(pos) {
+            return ++pos;
+        }
+
+        function FindTile(rank, file) {
+            return board.tilemap[RankToPos(rank)][FileToPos(file)];
         }
 
         function AddPiece(pos) {
@@ -147,114 +268,257 @@
                 var colour = "white";
                 if (i % 3 == 0|| i == 0) continue;
 
-                // CheckCommand(pgnArray[i], colour);
-                colour = (colour == "white") ? "black": "white";
+                DoCommand(pgnArray[i], colour);
+                colour = (colour.includes("white")) ? "black": "white";
             }
         }
 
-        function CheckCommand(command, colour) {
+        function DoCommand(command, colour) {
             // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
             if (command.includes('+')) {
                 // Handle Check
-                // Find King
-                // Highlight King Tile
-                console.log("Check");
+                DoCheck(colour);
+                // Remove '+'
+                command = command.replace('+', '');
+                // Call CheckCommand again
+                DoCommand(command, colour);
+                // Return so that DoBasicCommand() isn't called twice
+                return;
             }
             else if (command.includes('#')) {
                 // Handle Checkmate
-                // Find King
-                // Highlight King Tile
-                // New Text for checkmate
-                console.log("Checkmate");
+                DoCheckMate(colour);
+                // Remove '#'
+                command = command.replace('#', '');
+                // Call CheckCommand again
+                DoCommand(command, colour);
+                // Return
+                return;
             }
             
             if (command.includes("0-0-0")) {
                 // Handle Castle Queen
-                // Find 
-                console.log("Queen side Castle");
+                DoCastleQueen(colour);
+                // Return
+                return;
             }
             else if (command.includes("0-0")) {
                 // Handle Castle King
-                console.log("King Side Castle");
+                DoCastleKing(colour);
+                // Return
+                return;
             }
 
             if (command.includes('=')) {
                 // Handle Promote Pawn
-                console.log("Pawn promoted");
+                DoPromotePawn(command, colour);
+                // Remove '=' and last char
+                command = command.slice(0, command.length - 2);
+                // Call CheckCommand again
+                DoCommand(command, colour);
+                // Return
+                return;
             }
             
             if (command.includes('x')) {
                 // Handle Takes
-                console.log("Piece Taken");
+                // Remove Piece at pos of last 2 char
+                let takenTile = FindTile(command.charAt(command.length - 2), command.charAt(command.length - 1));
+                DoTakePiece(colour, takenTile);
+                // Remove 'x'
+                command = command.replace('x', '');
+                // Call CheckCommand again
+                DoCommand(command, colour);
+                // Return
+                return;
             }
 
-            var target = LookForPiece(command, colour);
-            var destX;
-            var destY; 
-                // do something
-            // if doesn't contain, only move piece 
-            // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
-                // Look for piece
-            // if doesn't contain, move pawn
-            // if pawn takes empty tile, remove pawn in tile below white/above black
-            MovePiece(target, destX, destY);
-            return;
+            DoBasicCommand(command, colour);
         }
 
-        // Change this if you find a better way.
-        function LookForPiece(command, colour) {
-            if (!command.includes('x')) {
-                if (command.includes('N')) {
-                    FindKnight(command, colour);
-                }
-                else if (command.includes('B')) {
-                    FindBishop(command, colour);
-                }
-                else if (command.includes('R')) {
-                    FindRook(command, colour);
-                }
-                else if (command.includes('Q')) {
-                    FindQueen(command, colour);
-                }
-                else if (command.includes('K')) {
-                    FindKing(command, colour);
-                }
+        function DoCheck(colour) {
+            return;
+            var kingPiece;
+            var highlightColour;
+            if (colour.includes("white")) {
+                // Look for black King tile
+                kingPiece = LookForPiece("K", "black");
+                let kingTile = kingPiece.tile;
+                // Highlight King tile
+                kingTile.mesh.colour = highlightColour;
             }
-            FindPawn()
+            else {
+                // Look for white King
+                kingPiece = LookForPiece("K", "white");
+                let kingTile = kingPiece.tile;
+                // Highlight King tile
+                kingTile.mesh.colour = highlightColour;
+            }
         }
 
-        function FindKnight(command, colour) {
-            // Find and return the Knight to move
-            return;
+        function DoCheckMate(colour) {
+            DoCheck(colour);
+            // new Text to say checkmate;
         }
 
-        function FindBishop(command, colour) {
-            // Find and return the Bishop to move
-            return;
-        }
-
-        function FindRook(command, colour) {
-            // Find and return the Rook to move
-            return;
+        function DoCastleQueen(colour) {
+            var kingPiece;
+            var rookPiece;
+            // if white
+            if (colour.includes("white")) {
+                // Find King
+                kingPiece = FindTile('e', 1).piece;
+                // Find Rook
+                rookPiece = FindTile('a', 1).piece;
+                // Move King 2 Left
+                MovePiece(kingPiece, 'c', 1);
+                // Move Rook 3 Right
+                MovePiece(rookPiece, 'd', 1);
+            }
+            else {
+                kingPiece = FindTile('e', 8).piece;
+                rookPiece = FindTile('a', 8).piece;
+                MovePiece(kingPiece, 'c', 8);
+                MovePiece(rookPiece, 'd', 8);
+            }
         }
         
-        function FindQueen(command, colour) {
-            // Find and return the Queen to move
-            return;
+        function DoCastleKing(colour) {
+            var kingPiece;
+            var rookPiece;
+            // if white
+            if (colour.includes("white")) {
+                // Find King
+                kingPiece = FindTile('e', 1).piece;
+                // Find Rook
+                rookPiece = FindTile('h', 1).piece;
+                // Move King 2 Right
+                MovePiece(kingPiece, 'g', 1);
+                // Move Rook 3 Left
+                MovePiece(rookPiece, 'f', 1);
+            }
+            else {
+                kingPiece = FindTile('e', 8).piece;
+                rookPiece = FindTile('h', 8).piece;
+                MovePiece(kingPiece, 'g', 8);
+                MovePiece(rookPiece, 'f', 8);
+            }
         }
 
-        function FindKing(command, colour) {
-            // Find and return the King to move
-            return;
+        function DoPromotePawn(command, colour) {
+            let newPieceType = command.charAt(command.length - 1);
+            var rank;
+            if (colour.includes("white")) {
+                rank = 7;
+            }
+            else {
+                rank = 2;
+            }
+            let file = command.charAt(0);
+            let pawnTile = FindTile(rank, file);
+            // Remove Pawn
+            scene.remove(pawnTile.piece.mesh);
+            // Add new Piece depending on last letter
+            AddPiece(newPieceType, rank, file);
         }
 
-        function FindPawn(command, colour) {
-            // Find and return the Pawn to move
-            return;
+        function DoTakePiece(colour, takenTile) {
+            return; // REMOVE THIS WHEN DONE
+            // Remove piece at takenTile
+            // Move it to TakenPieces of same colour
+            takenTile.getPiece().getMesh().position.set(10,0,0);
         }
 
-        function MovePiece(target, destinationX, destinationY) {
-            // Move a piece, don't need to return anything;
+        function DoBasicCommand(command, colour) {
+            // endRank/y-axis = last char
+            var endRank = command.charAt(command.length - 1);
+            // endFile/x-axis = 2nd last char
+            var endFile = command.charAt(command.length - 2);
+
+            // target = piece to move
+            var target;
+
+            // if 2 char -- e4
+            if (command.length == 2) {
+                var tile; 
+                // Look for Pawn
+                // Set target to Pawn
+                if (colour.includes("white")) {
+                    target = FindTile(endFile.toString(), (endRank - 1)).piece;
+                }
+                else {
+                    target = FindTile('endFile', (endRank + 1)).piece;
+                }
+            }
+            // if 3 char -- Qe4
+            else if (command.length == 3) {
+                // Look for piece of type 1st char
+                // Type of piece is specified in first char as UpperCase
+                var type = command.charAt(0);
+                if (IsUpperCase(type)) {
+                    target = LookForPiece(type, colour);
+                }
+                // If type is not UpperCase, type must be pawn and file is specified
+                else {
+                    target = LookForPiece();
+                }
+            }
+            // if 4 char -- Qde4/Q3e4
+            else if (command.length == 4) {
+                // Look for piece of type 1st char on 2nd char rank/file
+                var disambiguator = command.charAt(1);
+                // If 2nd character is a a-h, find piece on that file
+                if ((/[a-h]/).test(disambiguator)) {
+                    var file = disambiguator;
+                }
+                // Else 2nd character is 1-8. find piece on that rank
+                else {
+                    var rank = disambiguator;
+                }
+                target = LookForPiece();
+            }
+            // if 5 char -- Qd3e4
+            else {
+                // Look for piece at position (2nd, 3rd)
+                // Move piece to destination
+                var file = command.charAt(1);
+                var rank = command.charAt(2);
+                target = FindTile(file, rank).getPiece();
+            }
+            
+            MovePiece(target, endFile, endRank);
+        }
+
+        function IsUpperCase(str) {
+            if (str.toUpperCase() === str) return true;
+            return false;
+        }
+
+        // This function will always be called with both type paramanter as a single upper-case character eg, "R"
+        // and colour paramater as a string, either "white" or "black"
+        // Function should return the reference to the piece.
+        function LookForPiece(type, colour) {
+            // if colour.incldes("white") 
+            // Look for white piece
+            // else
+            // look for black piece
+            switch (type) {
+                case 'K':
+                    //do something
+                    break;
+                case 'Q':
+                    break;
+                default:
+                    return;
+            }
+
+        }
+
+        function MovePiece(target, endFile, endRank) {
+            // Change the tile that the piece points to.
+            // Old tile should dereference the piece.
+            // New tile should reference piece.
+            // No need to return anything.
             return;
         }
 
