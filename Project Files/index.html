@@ -11,7 +11,7 @@
 <body>
     <script src="js/three.js"> </script>
     <script src="js/OrbitControls.js"> </script>
-    <script src="js/PLYLoader.js"></script>
+    <script src="js/STLLoader.js"></script>
 
     <style>
         body {
@@ -29,17 +29,144 @@
         }
     </style>
 
-    <dic>
+    <div>
         <p>Chess Project</p>
-    </dic>
+    </div>
 
     <script>
         
-        var scene, camera, renderer;
-        var board;
+        //holds the pieces of each player, whites and blacks
+        var black_pieces={};
+        var white_pieces={};
+        let whiteTileColour = new THREE.Color(0xffffff);
+        let blackTileColour = new THREE.Color(0x000000);
+        let checkTileColour = new THREE.Color(0xd61b1b);
 
-        init();
-        animate();
+        /* StorePGN should write the proper pieces in the array board with the format of "BP0" for black pawn 0 */
+        /* 
+            B for black, W for white,
+            T for tower, H for knight, R for rook, K for king, Q for queen, P for pawn
+            0 .. 7 the number of the pieces which are duplicated in each color,
+            0 for the ones on the left hand, 1 for the ones on  the right hand, 
+        */
+        let pieceMap = [
+          ["BT0", "BH0", "BR0", "BQ", "BK", "BR1", "BH1", "BT1"],
+          ["BP0", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5", "WP6", "WP7"],
+          ["WT0", "WH0", "WR0", "WQ", "WK", "WR1", "WH1", "WT1"]
+        ];
+        const Board = {
+            tilemap: [],
+        };
+        
+        board = Board;
+        board.tilemap = new Array(8);
+        for (let i = 0; i < 8; i++) {
+            board.tilemap[i] = new Array(8);
+        }
+
+        class Tile {
+            constructor(file, rank) {
+                this.file = file;
+                this.rank = rank;
+                this.colour;
+                this.piece;
+                this.mesh;
+                this.originalMaterial;
+            }
+            getColour() {
+                return this.colour;
+            }
+            setColour(value) {
+                this.colour = value;
+            }
+            getRank() {
+                return this.rank;
+            }
+            getFile() {
+                return this.file;
+            }
+            getPiece() {
+                return this.piece;
+            }
+            setPiece(value) {
+                this.piece = value;
+            }
+            getMesh() {
+                return this.mesh;
+            }
+            setMesh(value) {
+                this.mesh = value;
+            }
+            getOriginalMaterial() {
+                return this.originalMaterial;
+            }
+            setOriginalMaterial(value) {
+                this.originalMaterial = value;
+            }
+        }
+
+        class Piece {
+            constructor(type, tile, mesh, colour) {
+                this.type = type;
+                this.tile = tile;
+                this.mesh = mesh;
+                this.colour = colour;
+            }
+            getType() {
+                return this.type;
+            }
+            getTile() {
+                return this.tile;
+            }
+            setTile(value) {
+                this.tile = value;
+            }
+            getColour() {
+                return this.colour;
+            }
+            setColour(value) {
+                this.colour = value;
+            }
+            getMesh() {
+                return this.mesh;
+            }
+            setMesh(value) {
+                this.mesh = value;
+            }
+        }
+
+        class TakenPieces {
+            constructor(colour) {
+                this.colour = colour;
+                this.pieces = [];
+            }
+            getPieces() {
+                return this.pieces;
+            }
+            setPieces(value) {
+                this.pieces = value;
+            }
+            addPiece(value) {
+                this.pieces.push(value);
+            }
+        }
+        var scene, camera, renderer;
+        let loader = new THREE.STLLoader();
+        let material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
+        var board, game_group;
+
+        //make the script wait until all the pieces are loaded before initializing the game and rendering
+        loadModels().then(
+            function() {
+                init();
+                animate();
+            }
+        );
         
         function init() {
             
@@ -54,8 +181,9 @@
             // camera
             var ratio = window.innerWidth/window.innerHeight;
             camera = new THREE.PerspectiveCamera(45,ratio,0.1,1000);
-            camera.position.set(0,0,20);
-            camera.lookAt(0,0,1);
+            camera.position.set(10,10,10); //initial position of the camera
+            camera.lookAt(4,0,4);
+            camera.updateProjectionMatrix();
 
             // resize
             window.addEventListener('resize', function() {
@@ -65,182 +193,136 @@
             });
 
             // lights
-            var light = new THREE.PointLight(new THREE.Color(1,1,1), 0.5);
-            camera.add(light);
+            var light = new THREE.PointLight(new THREE.Color(1,1,1), 1);
+            light.position.set(5,5,0)
+            scene.add(new THREE.AmbientLight(0x404040));
             scene.add(light);
-
-            // ambient
-            
-            // geometry
-            var plane_geometry = new THREE.PlaneGeometry(10, 10);
-            // var plane_material = new THREE.MeshBasicMaterial ({
-            //     color: new THREE.Color(0x0000ff),
-            //     transparent: false,
-            //     opacity: 0.85,
-            //     side: THREE.DoubleSide,
-            // })
-            // plane = new THREE.Mesh(plane_geometry, plane_material);
-            // scene.add(plane);
-
-            CreateBoard();
             
             //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
-
+            
             //axes. uncomment below line to show axes
             scene.add(new THREE.AxesHelper(20));
+
+            // var geometry = new THREE.BoxGeometry(1, 1, 1);
+            // var material = new THREE.MeshBasicMaterial({color: new THREE.Color(0xffffff)});
+            // var mesh = new THREE.Mesh(geometry, material);
+            // mesh.position.set(0,0,1);
+            // scene.add(mesh);
             
             var string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#";
             var KasparovVsTopalov = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#"
             
             pgn = StorePGN(string);
             
+            CreateBoard();
             StartGame(pgn);
 
         }
-
+        
+        var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
+        var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
+        var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
+        var checkTileMaterial = new THREE.MeshBasicMaterial ({color: checkTileColour});
         function CreateBoard() {
-            var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
-            var blackTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0x000000)});
-            var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0xffffff)});
 
-            const Board = {
-                tilemap: [],
-            };
-
-            board = Board;
-            board.tilemap = new Array(8);
-            for (let i = 0; i < 8; i++) {
-                board.tilemap[i] = new Array(8);
-            }
-
-            class Tile {
-                constructor(file, rank) {
-                    this.file = file;
-                    this.rank = rank;
-                    this.colour;
-                    this.piece;
-                    this.mesh;
-                }
-                getColour() {
-                    return this.colour;
-                }
-                setColour(value) {
-                    this.colour = value;
-                }
-                getRank() {
-                    return this.rank;
-                }
-                setRank(value) {
-                    this.rank = value;
-                }
-                getFile() {
-                    return this.file;
-                }
-                setFile(value) {
-                    this.file = value;
-                }
-                getPiece() {
-                    return this.piece;
-                }
-                setPiece(value) {
-                    this.piece = value;
-                }
-                getMesh() {
-                    return this.mesh;
-                }
-                setMesh(value) {
-                    this.mesh = value;
-                }
-            }
-
-            class Piece {
-                constructor(type, tile) {
-                    this.type = type;
-                    this.tile = tile;
-                    this.colour;
-                    this.mesh;
-                }
-                getType() {
-                    return this.type;
-                }
-                getTile() {
-                    return this.tile;
-                }
-                setTile(value) {
-                    this.tile = value;
-                }
-                getColour() {
-                    return this.colour;
-                }
-                setColour(value) {
-                    this.colour = value;
-                }
-                getMesh() {
-                    return this.mesh;
-                }
-                setMesh(value) {
-                    this.mesh = value;
-                }
-            }
-
-            class TakenPieces {
-                constructor(colour) {
-                    this.colour = colour;
-                    this.pieces = [];
-                }
-                getPieces() {
-                    return this.pieces;
-                }
-                setPieces(value) {
-                    this.pieces = value;
-                }
-                addPiece(value) {
-                    this.pieces.push(value);
-                }
-            }
+            game_group = new THREE.Group();
 
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
                     let tile = new Tile(PosToFile(i), PosToRank(j));
-                    var colour;
+                    var tileColour;
+                    var tileMaterial;
                     if (j % 2) {
-                        colour = (i % 2) ? "black" : "white";
-                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("black") ? blackTileMaterial : whiteTileMaterial));
+                        if (i % 2) {
+                            tileColour = "black";
+                            tileMaterial = blackTileMaterial;
+                        } else {
+                            tileColour = "white";
+                            tileMaterial = whiteTileMaterial;
+                        }
+                    } else {
+                        if (i % 2) {
+                            tileColour = "white";
+                            tileMaterial = whiteTileMaterial;
+                            tile.setColour(whiteTileColour);
+                        } else {
+                            tileColour = "black";
+                            tileMaterial = blackTileMaterial;
+                        }
                     }
-                    else {
-                        colour = (i % 2) ? "white" : "black";
-                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("white") ? whiteTileMaterial : blackTileMaterial));
-                    }
+                    tile.setColour(tileColour);
+                    tile.setMesh(new THREE.Mesh(tileGeometry, tileMaterial))
+                    tile.setOriginalMaterial(tileMaterial);
                     tile.getMesh().position.set(i, 0, j);
                     // FindTile(currentFile, currentRank).getPiece().tile = FindTile(newFile, newRank);
-                    tile.setColour(colour);
                     board.tilemap[i][j] = tile;
-                    scene.add(tile.getMesh());
+                    game_group.add(tile.getMesh());
                 }
             }
+            PlacePieces();
+            scene.add(game_group);
+        }
+
+        //variables to keep the models in memory
+        var model_pawn = null;
+        var model_knight = null;
+        var model_rook = null;
+        var model_queen = null;
+        var model_king = null;
+        var model_bishop = null;
+
+        function loadModels(){
+          // the loadObject function works asynchronously using callbacks,
+          // we use Promise.all to wait for all the models to load before continuing
+          return Promise.all(
+              [
+                loadObject("./models/model_pawn.stl"),
+                loadObject("./models/model_knight.stl"),
+                loadObject("./models/model_rook.stl"),
+                loadObject("./models/model_queen.stl"),
+                loadObject("./models/model_king.stl"),
+                loadObject("./models/model_bishop.stl")
+              ]
+          ).then(function(objects){
+              model_pawn = objects[0];
+              model_knight = objects[1];
+              model_rook = objects[2];
+              model_queen = objects[3];
+              model_king = objects[4];
+              model_bishop = objects[5];
+          })
+        }
+        
+        function loadObject(path) {
+          // create a new promise that will resolve when the file is completely loaded
+          return new Promise(function(resolve,reject){
+            loader.load(path, function (geometry) {
+              resolve(new THREE.Mesh(geometry, material)); // create a 3d object from the file, and using a placeholder material
+             })
+          });
         }
 
         function RankToPos(rank) {
-            var ranks = ['a','b','c','d','e','f','g','h'];
-            return ranks.indexOf(rank);
+            return --rank;
         }
 
         function FileToPos(file) {
-            return --file;
+            var files = ['a','b','c','d','e','f','g','h'];
+            return files.indexOf(file);
         }
 
         function PosToRank(pos) {
-            var ranks = ['a','b','c','d','e','f','g','h'];
-            return ranks[pos];
-        }
-
-        function PosToFile(pos) {
             return ++pos;
         }
 
-        function FindTile(rank, file) {
-            return board.tilemap[RankToPos(rank)][FileToPos(file)];
+        function PosToFile(pos) {
+            var files = ['a','b','c','d','e','f','g','h'];
+            return files[pos];
+        }
+
+        function FindTile(file, rank) {
+            return board.tilemap[FileToPos(file)][RankToPos(rank)];
         }
 
         function AddPiece(pos) {
@@ -262,6 +344,76 @@
             return moveArray;
         }
 
+        //materials to be reused in the pieces
+        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
+        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
+
+        function CreatePiece(color, model, name, row, column) {
+          // creates a piece cloning the model and set to a position in row, column
+          var pieces;
+          if (color === "W") {
+            pieces = white_pieces; // set to the list of white's pieces
+            pieces[name] = model.clone(); 
+            pieces[name].material = whitePieceMaterial; 
+            pieces[name].position.set(row, 0, column); // assign the position 
+            pieces[name].rotation.y = Math.PI; // rotate facing towards blacks
+            game_group.add(pieces[name]);
+          } else if (color === "B") {
+            pieces = black_pieces; // set to the list of black's pieces
+            pieces[name] = model.clone(); 
+            pieces[name].material = blackPieceMaterial; 
+            pieces[name].position.set(row, 0, column); 
+            game_group.add(pieces[name]);
+          }
+          return pieces[name];
+        }
+
+        function PlacePieces() {
+          // two-loop for assigning each piece in the board
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              let name = pieceMap[7-i][j]; //  get the piece position from the corresponding cell in the board 2d array
+              if (name === "") {
+                continue;
+              }
+              let color = name.charAt(0); // get the color, W or B
+              let piece = name.charAt(1); // get the piece type, P, K, H, T, Q, R
+              let number = name.charAt(2); // get the corresponding identifier number
+
+            //   console.log({ color, piece, number })
+              
+              let tile = board.tilemap[j][i];
+              var newPiece;
+              switch (piece) {
+                case "P":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_pawn, name, j, i), color);
+                    break;
+                case "K":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_king, name, j, i), color);
+                    break;
+                case "H":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_knight, name, j, i), color);
+                    break;
+                case "T":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_rook, name, j, i), color);
+                    break;
+                case "Q":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_queen, name, j, i), color);
+                    break;
+                case "R":
+                    newPiece = new Piece(piece, tile, CreatePiece(color, model_bishop, name, j, i), color);
+                    break;
+              }
+              tile.setPiece(newPiece);
+            }
+        }
+        // for (let i = 0; i < 8; i++) {
+        //     for (let j = 0; j < 8; j++) {
+        //         console.log(board.tilemap[i][j]);
+        //     }
+        // }
+        }
+
         function StartGame(pgnArray) {
             for (var i = 0; i < pgnArray.length; i++) {
                 // ignore the 1., 2. elements
@@ -272,16 +424,24 @@
                 colour = (colour.includes("white")) ? "black": "white";
             }
         }
-
+        
+        var skipTestCheck = true;
         function DoCommand(command, colour) {
+            console.log("command: "+command);
+            console.log(skipTestCheck);
+            if (skipTestCheck == false) TestCheck();
             // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
             if (command.includes('+')) {
                 // Handle Check
                 DoCheck(colour);
                 // Remove '+'
                 command = command.replace('+', '');
+                // On repeated calls, TestCheck() wont be called, so the check wont be immediately undone.
+                skipTestCheck = true;
                 // Call CheckCommand again
                 DoCommand(command, colour);
+                // Calls after will now undo the check
+                skipTestCheck = false;
                 // Return so that DoBasicCommand() isn't called twice
                 return;
             }
@@ -336,23 +496,36 @@
             DoBasicCommand(command, colour);
         }
 
+        function TestCheck() {
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    let tempTile = board.tilemap[i][j];
+                    if (tempTile.getPiece() == undefined) continue;
+                    if (tempTile.getPiece().getType() == 'K') {
+                        if (Object.is(tempTile.getMesh().material, checkTileMaterial)) tempTile.getMesh().material = tempTile.getOriginalMaterial();
+                    }
+                }
+            }
+        }
+
         function DoCheck(colour) {
-            return;
+            // return;
             var kingPiece;
-            var highlightColour;
+            var highlightColour = checkTileColour;
             if (colour.includes("white")) {
                 // Look for black King tile
-                kingPiece = LookForPiece("K", "black");
-                let kingTile = kingPiece.tile;
+                // kingPiece = LookForPiece("K", "black");
+                kingPiece = FindTile('e', 1).getPiece();
+                let kingTile = kingPiece.getTile();
                 // Highlight King tile
-                kingTile.mesh.colour = highlightColour;
+                kingTile.getMesh().material = checkTileMaterial;
             }
             else {
                 // Look for white King
                 kingPiece = LookForPiece("K", "white");
-                let kingTile = kingPiece.tile;
+                let kingTile = kingPiece.getTile();
                 // Highlight King tile
-                kingTile.mesh.colour = highlightColour;
+                kingTile.getMesh().colour = highlightColour;
             }
         }
 
@@ -444,7 +617,7 @@
                 // Look for Pawn
                 // Set target to Pawn
                 if (colour.includes("white")) {
-                    target = FindTile(endFile.toString(), (endRank - 1)).piece;
+                    target = FindTile(endFile.toString(), (--endRank)).piece;
                 }
                 else {
                     target = FindTile('endFile', (endRank + 1)).piece;
@@ -521,7 +694,6 @@
             // No need to return anything.
             return;
         }
-
     </script>
 </body>
 </html>
