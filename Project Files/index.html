@@ -9,9 +9,11 @@
 </style>
 
 <body>
+
+
     <script src="js/three.js"> </script>
     <script src="js/OrbitControls.js"> </script>
-    <script src="js/PLYLoader.js"></script>
+    <script src="js/STLLoader.js"></script>
 
     <style>
         body {
@@ -34,225 +36,155 @@
     </dic>
 
     <script>
-        
-        var scene, camera, renderer;
-        var board;
+        //holds the pieces of each player, whites and blacks
+        var black_pieces={};
+        var white_pieces={};
 
-        init();
-        animate();
-        
+        /* StorePGN should write the proper pieces in the array board with the format of "BP0" for black pawn 0 */
+        /* 
+            B for black, W for white,
+            T for tower, H for knight, R for rook, K for king, Q for queen, P for pawn
+            0 .. 7 the number of the pieces which are duplicated in each color,
+            0 for the ones on the left hand, 1 for the ones on  the right hand, 
+        */
+        let board = [
+          ["BT0", "BH0", "BR0", "BK", "BQ", "BR1", "BH1", "BT1"],
+          ["BP0", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", ""],
+          ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5", "WP6", "WP7"],
+          ["WT0", "WH0", "WR0", "WQ", "WK", "WR1", "WH1", "WT1"]
+        ];
+
+        var scene, camera, renderer, group_board;
+        var loader = new THREE.STLLoader();
+        var material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
+
+        //make the script wait until all the pieces are loaded before initializing the game and rendering
+        loadModels().then(
+          function(){
+            init();
+            animate();
+          }
+        );
+
         function init() {
-            
             // scene
             scene = new THREE.Scene();
+            var container = new THREE.Object3D();
 
             // renderer
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-            
+
             // camera
             var ratio = window.innerWidth/window.innerHeight;
             camera = new THREE.PerspectiveCamera(45,ratio,0.1,1000);
-            camera.position.set(0,0,20);
-            camera.lookAt(0,0,1);
+            camera.position.set(10,10,10); //initial position of the camera
 
             // resize
             window.addEventListener('resize', function() {
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                camera.aspect = window.innerWidth, window.innerHeight;
+                camera.aspect = window.innerWidth/ window.innerHeight;
                 camera.updateProjectionMatrix();
             });
 
             // lights
-            var light = new THREE.PointLight(new THREE.Color(1,1,1), 0.5);
-            camera.add(light);
+            var light = new THREE.PointLight(new THREE.Color(1,1,1), 1);
+            light.position.set(5,5,0)
+            scene.add(new THREE.AmbientLight(0x404040));
             scene.add(light);
 
-            // ambient
-            
-            // geometry
-            var plane_geometry = new THREE.PlaneGeometry(10, 10);
-            // var plane_material = new THREE.MeshBasicMaterial ({
-            //     color: new THREE.Color(0x0000ff),
-            //     transparent: false,
-            //     opacity: 0.85,
-            //     side: THREE.DoubleSide,
-            // })
-            // plane = new THREE.Mesh(plane_geometry, plane_material);
-            // scene.add(plane);
-
-            CreateBoard();
-            
             //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
 
             //axes. uncomment below line to show axes
             scene.add(new THREE.AxesHelper(20));
-            
+
             var string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#";
             var KasparovVsTopalov = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#"
-            
-            pgn = StorePGN(string);
-            
-            StartGame(pgn);
 
+            pgn = StorePGN(string);
+
+            CreateBoard();
+            StartGame(pgn);
         }
 
         function CreateBoard() {
             var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
-            var blackTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0x000000)});
-            var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: new THREE.Color(0xffffff)});
+            var blackTileMaterial = new THREE.MeshPhongMaterial ({color: new THREE.Color(0x000000)});
+            var whiteTileMaterial = new THREE.MeshPhongMaterial ({color: new THREE.Color(0xffffff)});
 
-            const Board = {
-                tilemap: [],
-            };
-
-            board = Board;
-            board.tilemap = new Array(8);
-            for (let i = 0; i < 8; i++) {
-                board.tilemap[i] = new Array(8);
-            }
-
-            class Tile {
-                constructor(file, rank) {
-                    this.file = file;
-                    this.rank = rank;
-                    this.colour;
-                    this.piece;
-                    this.mesh;
-                }
-                getColour() {
-                    return this.colour;
-                }
-                setColour(value) {
-                    this.colour = value;
-                }
-                getRank() {
-                    return this.rank;
-                }
-                setRank(value) {
-                    this.rank = value;
-                }
-                getFile() {
-                    return this.file;
-                }
-                setFile(value) {
-                    this.file = value;
-                }
-                getPiece() {
-                    return this.piece;
-                }
-                setPiece(value) {
-                    this.piece = value;
-                }
-                getMesh() {
-                    return this.mesh;
-                }
-                setMesh(value) {
-                    this.mesh = value;
-                }
-            }
-
-            class Piece {
-                constructor(type, tile) {
-                    this.type = type;
-                    this.tile = tile;
-                    this.colour;
-                    this.mesh;
-                }
-                getType() {
-                    return this.type;
-                }
-                getTile() {
-                    return this.tile;
-                }
-                setTile(value) {
-                    this.tile = value;
-                }
-                getColour() {
-                    return this.colour;
-                }
-                setColour(value) {
-                    this.colour = value;
-                }
-                getMesh() {
-                    return this.mesh;
-                }
-                setMesh(value) {
-                    this.mesh = value;
-                }
-            }
-
-            class TakenPieces {
-                constructor(colour) {
-                    this.colour = colour;
-                    this.pieces = [];
-                }
-                getPieces() {
-                    return this.pieces;
-                }
-                setPieces(value) {
-                    this.pieces = value;
-                }
-                addPiece(value) {
-                    this.pieces.push(value);
-                }
-            }
-
+            group_board = new THREE.Group();
+            
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
-                    let tile = new Tile(PosToFile(i), PosToRank(j));
-                    var colour;
+                    var tile; 
                     if (j % 2) {
-                        colour = (i % 2) ? "black" : "white";
-                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("black") ? blackTileMaterial : whiteTileMaterial));
+                      
+                      tile = new THREE.Mesh(tileGeometry, i % 2 ? blackTileMaterial : whiteTileMaterial);
                     }
                     else {
-                        colour = (i % 2) ? "white" : "black";
-                        tile.setMesh(new THREE.Mesh(tileGeometry, colour.includes("white") ? whiteTileMaterial : blackTileMaterial));
+                      
+                      tile = new THREE.Mesh(tileGeometry, i % 2 ? whiteTileMaterial : blackTileMaterial);
                     }
-                    tile.getMesh().position.set(i, 0, j);
-                    // FindTile(currentFile, currentRank).getPiece().tile = FindTile(newFile, newRank);
-                    tile.setColour(colour);
-                    board.tilemap[i][j] = tile;
-                    scene.add(tile.getMesh());
+                    tile.position.set(i, 0, j); 
+                    group_board.add(tile); // add the 3d object
                 }
             }
+            //align the board 3d position to the center of the scene
+            group_board.position.x = -(3.5);
+            group_board.position.z = -(3.5);
+            scene.add(group_board); //adds the group that holds the entire board to the scene
         }
 
-        function RankToPos(rank) {
-            var ranks = ['a','b','c','d','e','f','g','h'];
-            return ranks.indexOf(rank);
+        //variables to keep the models in memory
+        var model_pawn = null;
+        var model_knight = null;
+        var model_rook = null;
+        var model_queen = null;
+        var model_king = null;
+        var model_bishop = null;
+
+        function loadModels(){
+          // the loadObject function works asynchronously using callbacks,
+          // we use Promise.all to wait for all the models to load before continuing
+          return Promise.all(
+              [
+                loadObject("./models/model_pawn.stl"),
+                loadObject("./models/model_knight.stl"),
+                loadObject("./models/model_rook.stl"),
+                loadObject("./models/model_queen.stl"),
+                loadObject("./models/model_king.stl"),
+                loadObject("./models/model_bishop.stl")
+              ]
+          ).then(function(objects){
+              model_pawn = objects[0];
+              model_knight = objects[1];
+              model_rook = objects[2];
+              model_queen = objects[3];
+              model_king = objects[4];
+              model_bishop = objects[5];
+          })
         }
 
-        function FileToPos(file) {
-            return --file;
-        }
-
-        function PosToRank(pos) {
-            var ranks = ['a','b','c','d','e','f','g','h'];
-            return ranks[pos];
-        }
-
-        function PosToFile(pos) {
-            return ++pos;
-        }
-
-        function FindTile(rank, file) {
-            return board.tilemap[RankToPos(rank)][FileToPos(file)];
-        }
-
-        function AddPiece(pos) {
-            // Create piece, add to scene, shoudln't need to return anything.
-            return;
+        function loadObject(path) {
+          // create a new promise that will resolve when the file is completely loaded
+          return new Promise(function(resolve,reject){
+            loader.load(path, function (geometry) {
+              resolve(new THREE.Mesh(geometry, material)); // create a 3d object from the file, and using a placeholder material
+             })
+          });
         }
 
         // animation loop
         function animate() {
-            renderer.render(scene, camera);
-            controls.update();
-            requestAnimationFrame(animate);
+          controls.update();
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
         }
 
         function StorePGN(pgn) {
@@ -262,265 +194,186 @@
             return moveArray;
         }
 
-        function StartGame(pgnArray) {
-            for (var i = 0; i < pgnArray.length; i++) {
-                // ignore the 1., 2. elements
-                var colour = "white";
-                if (i % 3 == 0|| i == 0) continue;
+        //materials to be reused in the pieces
+        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
+        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
 
-                DoCommand(pgnArray[i], colour);
-                colour = (colour.includes("white")) ? "black": "white";
-            }
+        function CreatePiece(color, model, name, row, column) {
+          // creates a piece cloning the model and set to a position in row, column
+          if (color === "W") {
+            let pieces = white_pieces; // set to the list of white's pieces
+            pieces[name] = model.clone(); 
+            pieces[name].material = whitePieceMaterial; 
+            pieces[name].position.set(row, 0, column); // assign the position 
+            group_board.add(white_pieces[name]); 
+          } else if (color === "B") {
+            let pieces = black_pieces; // set to the list of black's pieces
+            pieces[name] = model.clone(); 
+            pieces[name].material = blackPieceMaterial; 
+            pieces[name].position.set(row, 0, column); 
+            pieces[name].rotation.y = Math.PI; // rotate facing towards whites
+            group_board.add(black_pieces[name]); 
+          }
         }
 
-        function DoCommand(command, colour) {
+
+        function PlacePieces() {
+          // two-loop for assigning each piece in the board
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              let name = board[i][j]; //  get the piece position from the corresponding cell in the board 2d array
+              let color = name.charAt(0); // get the color, W or B
+              let piece = name.charAt(1); // get the piece type, P, K, H, T, Q, R
+              let number = name.charAt(2); // get the corresponding identifier number
+
+              console.log({ color, piece, number })
+              
+              switch (piece) {
+                case "P":
+                CreatePiece(color, model_pawn, name, j, i);
+                break;
+                case "K":
+                CreatePiece(color, model_king, name, j, i);
+                break;
+                case "H":
+                CreatePiece(color, model_knight, name, j, i);
+                break;
+                case "T":
+                CreatePiece(color, model_rook, name, j, i);
+                break;
+                case "Q":
+                CreatePiece(color, model_queen, name, j, i);
+                break;
+                case "R":
+                CreatePiece(color, model_bishop, name, j, i);
+                break;
+              }
+            }
+          }
+        }
+
+        function StartGame(pgnArray) {
+          // this should figure the initial position of the board from the pgnArray String (not implemented)
+          // should set up the board array with the proper positions
+          for (var i = 0; i < pgnArray.length; i++) {
+            // ignore the 1., 2. elements
+            var colour = "white";
+            if (i % 3 == 0|| i == 0) continue;
+
+            // CheckCommand(pgnArray[i], colour);
+            colour = (colour == "white") ? "black": "white";
+          }
+
+          // place the pieces according to the board array
+          PlacePieces();
+        }
+
+        function CheckCommand(command, colour) {
             // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
             if (command.includes('+')) {
                 // Handle Check
-                DoCheck(colour);
-                // Remove '+'
-                command = command.replace('+', '');
-                // Call CheckCommand again
-                DoCommand(command, colour);
-                // Return so that DoBasicCommand() isn't called twice
-                return;
+                // Find King
+                // Highlight King Tile
+                console.log("Check");
             }
             else if (command.includes('#')) {
                 // Handle Checkmate
-                DoCheckMate(colour);
-                // Remove '#'
-                command = command.replace('#', '');
-                // Call CheckCommand again
-                DoCommand(command, colour);
-                // Return
-                return;
+                // Find King
+                // Highlight King Tile
+                // New Text for checkmate
+                console.log("Checkmate");
             }
-            
+
             if (command.includes("0-0-0")) {
                 // Handle Castle Queen
-                DoCastleQueen(colour);
-                // Return
-                return;
+                // Find
+                console.log("Queen side Castle");
             }
             else if (command.includes("0-0")) {
                 // Handle Castle King
-                DoCastleKing(colour);
-                // Return
-                return;
+                console.log("King Side Castle");
             }
 
             if (command.includes('=')) {
                 // Handle Promote Pawn
-                DoPromotePawn(command, colour);
-                // Remove '=' and last char
-                command = command.slice(0, command.length - 2);
-                // Call CheckCommand again
-                DoCommand(command, colour);
-                // Return
-                return;
+                console.log("Pawn promoted");
             }
-            
+
             if (command.includes('x')) {
                 // Handle Takes
-                // Remove Piece at pos of last 2 char
-                let takenTile = FindTile(command.charAt(command.length - 2), command.charAt(command.length - 1));
-                DoTakePiece(colour, takenTile);
-                // Remove 'x'
-                command = command.replace('x', '');
-                // Call CheckCommand again
-                DoCommand(command, colour);
-                // Return
-                return;
+                console.log("Piece Taken");
             }
 
-            DoBasicCommand(command, colour);
-        }
-
-        function DoCheck(colour) {
-            return;
-            var kingPiece;
-            var highlightColour;
-            if (colour.includes("white")) {
-                // Look for black King tile
-                kingPiece = LookForPiece("K", "black");
-                let kingTile = kingPiece.tile;
-                // Highlight King tile
-                kingTile.mesh.colour = highlightColour;
-            }
-            else {
-                // Look for white King
-                kingPiece = LookForPiece("K", "white");
-                let kingTile = kingPiece.tile;
-                // Highlight King tile
-                kingTile.mesh.colour = highlightColour;
-            }
-        }
-
-        function DoCheckMate(colour) {
-            DoCheck(colour);
-            // new Text to say checkmate;
-        }
-
-        function DoCastleQueen(colour) {
-            var kingPiece;
-            var rookPiece;
-            // if white
-            if (colour.includes("white")) {
-                // Find King
-                kingPiece = FindTile('e', 1).piece;
-                // Find Rook
-                rookPiece = FindTile('a', 1).piece;
-                // Move King 2 Left
-                MovePiece(kingPiece, 'c', 1);
-                // Move Rook 3 Right
-                MovePiece(rookPiece, 'd', 1);
-            }
-            else {
-                kingPiece = FindTile('e', 8).piece;
-                rookPiece = FindTile('a', 8).piece;
-                MovePiece(kingPiece, 'c', 8);
-                MovePiece(rookPiece, 'd', 8);
-            }
-        }
-        
-        function DoCastleKing(colour) {
-            var kingPiece;
-            var rookPiece;
-            // if white
-            if (colour.includes("white")) {
-                // Find King
-                kingPiece = FindTile('e', 1).piece;
-                // Find Rook
-                rookPiece = FindTile('h', 1).piece;
-                // Move King 2 Right
-                MovePiece(kingPiece, 'g', 1);
-                // Move Rook 3 Left
-                MovePiece(rookPiece, 'f', 1);
-            }
-            else {
-                kingPiece = FindTile('e', 8).piece;
-                rookPiece = FindTile('h', 8).piece;
-                MovePiece(kingPiece, 'g', 8);
-                MovePiece(rookPiece, 'f', 8);
-            }
-        }
-
-        function DoPromotePawn(command, colour) {
-            let newPieceType = command.charAt(command.length - 1);
-            var rank;
-            if (colour.includes("white")) {
-                rank = 7;
-            }
-            else {
-                rank = 2;
-            }
-            let file = command.charAt(0);
-            let pawnTile = FindTile(rank, file);
-            // Remove Pawn
-            scene.remove(pawnTile.piece.mesh);
-            // Add new Piece depending on last letter
-            AddPiece(newPieceType, rank, file);
-        }
-
-        function DoTakePiece(colour, takenTile) {
-            return; // REMOVE THIS WHEN DONE
-            // Remove piece at takenTile
-            // Move it to TakenPieces of same colour
-            takenTile.getPiece().getMesh().position.set(10,0,0);
-        }
-
-        function DoBasicCommand(command, colour) {
-            // endRank/y-axis = last char
-            var endRank = command.charAt(command.length - 1);
-            // endFile/x-axis = 2nd last char
-            var endFile = command.charAt(command.length - 2);
-
-            // target = piece to move
-            var target;
-
-            // if 2 char -- e4
-            if (command.length == 2) {
-                var tile; 
-                // Look for Pawn
-                // Set target to Pawn
-                if (colour.includes("white")) {
-                    target = FindTile(endFile.toString(), (endRank - 1)).piece;
-                }
-                else {
-                    target = FindTile('endFile', (endRank + 1)).piece;
-                }
-            }
-            // if 3 char -- Qe4
-            else if (command.length == 3) {
-                // Look for piece of type 1st char
-                // Type of piece is specified in first char as UpperCase
-                var type = command.charAt(0);
-                if (IsUpperCase(type)) {
-                    target = LookForPiece(type, colour);
-                }
-                // If type is not UpperCase, type must be pawn and file is specified
-                else {
-                    target = LookForPiece();
-                }
-            }
-            // if 4 char -- Qde4/Q3e4
-            else if (command.length == 4) {
-                // Look for piece of type 1st char on 2nd char rank/file
-                var disambiguator = command.charAt(1);
-                // If 2nd character is a a-h, find piece on that file
-                if ((/[a-h]/).test(disambiguator)) {
-                    var file = disambiguator;
-                }
-                // Else 2nd character is 1-8. find piece on that rank
-                else {
-                    var rank = disambiguator;
-                }
-                target = LookForPiece();
-            }
-            // if 5 char -- Qd3e4
-            else {
-                // Look for piece at position (2nd, 3rd)
-                // Move piece to destination
-                var file = command.charAt(1);
-                var rank = command.charAt(2);
-                target = FindTile(file, rank).getPiece();
-            }
-            
-            MovePiece(target, endFile, endRank);
-        }
-
-        function IsUpperCase(str) {
-            if (str.toUpperCase() === str) return true;
-            return false;
-        }
-
-        // This function will always be called with both type paramanter as a single upper-case character eg, "R"
-        // and colour paramater as a string, either "white" or "black"
-        // Function should return the reference to the piece.
-        function LookForPiece(type, colour) {
-            // if colour.incldes("white") 
-            // Look for white piece
-            // else
-            // look for black piece
-            switch (type) {
-                case 'K':
-                    //do something
-                    break;
-                case 'Q':
-                    break;
-                default:
-                    return;
-            }
-
-        }
-
-        function MovePiece(target, endFile, endRank) {
-            // Change the tile that the piece points to.
-            // Old tile should dereference the piece.
-            // New tile should reference piece.
-            // No need to return anything.
+            var target = LookForPiece(command, colour);
+            var destX;
+            var destY;
+                // do something
+            // if doesn't contain, only move piece
+            // Check Contains UpperCase (N: Knight, B: Bishop, R:Rook, Q: Queen, K: King)
+                // Look for piece
+            // if doesn't contain, move pawn
+            // if pawn takes empty tile, remove pawn in tile below white/above black
+            MovePiece(target, destX, destY);
             return;
         }
+
+        // Change this if you find a better way.
+        function LookForPiece(command, colour) {
+            if (!command.includes('x')) {
+                if (command.includes('N')) {
+                    FindKnight(command, colour);
+                }
+                else if (command.includes('B')) {
+                    FindBishop(command, colour);
+                }
+                else if (command.includes('R')) {
+                    FindRook(command, colour);
+                }
+                else if (command.includes('Q')) {
+                    FindQueen(command, colour);
+                }
+                else if (command.includes('K')) {
+                    FindKing(command, colour);
+                }
+            }
+            FindPawn()
+        }
+
+        function FindKnight(command, colour) {
+            // Find and return the Knight to move
+            return;
+        }
+
+        function FindBishop(command, colour) {
+            // Find and return the Bishop to move
+            return;
+        }
+
+        function FindRook(command, colour) {
+            // Find and return the Rook to move
+            return;
+        }
+
+        function FindQueen(command, colour) {
+            // Find and return the Queen to move
+            return;
+        }
+
+        function FindKing(command, colour) {
+            // Find and return the King to move
+            return;
+        }
+
+        function FindPawn(command, colour) {
+            // Find and return the Pawn to move
+            return;
+        }
+
+        function MovePiece(target, destinationX, destinationY) {
+            // Move a piece, don't need to return anything;
+            return;
+        }
+
 
     </script>
 </body>
