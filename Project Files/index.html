@@ -33,6 +33,10 @@
         <p>Chess Project</p>
     </div>
 
+    <button id="SoundButton" onclick="PlaySound()">Click Me</button>
+
+    <div id="TextBox" style="visibility:hidden"></div>
+
     <script>
         
         //holds the pieces of each player, whites and blacks
@@ -210,7 +214,7 @@
             // mesh.position.set(0,0,1);
             // scene.add(mesh);
             
-            let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#";
+            let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
             let KasparovVsTopalov1999 = "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Be3 Bg7 5. Qd2 c6 6. f3 b5 7. Nge2 Nbd7 8. Bh6 Bxh6 9. Qxh6 Bb7 10. a3 e5 11. O-O-O Qe7 12. Kb1 a6 13. Nc1 O-O-O 14. Nb3 exd4 15. Rxd4 c5 16. Rd1 Nb6 17. g3 Kb8 18. Na5 Ba8 19. Bh3 d5 20. Qf4+ Ka7 21. Rhe1 d4 22. Nd5 Nbxd5 23. exd5 Qd6 24. Rxd4 cxd4 25. Re7+ Kb6 26. Qxd4+ Kxa5 27. b4+ Ka4 28. Qc3 Qxd5 29. Ra7 Bb7 30. Rxb7 Qc4 31. Qxf6 Kxa3 32. Qxa6+ Kxb4 33. c3+ Kxc3 34. Qa1+ Kd2 35. Qb2+ Kd1 36. Bf1 Rd2 37. Rd7 Rxd7 38. Bxc4 bxc4 39. Qxh8 Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
             let MorphyVsAllies1858 = "1. e4 e5 2. Nf3 d6 3. d4 Bg4 4. dxe5 Bxf3 5. Qxf3 dxe5 6. Bc4 Nf6 7. Qb3 Qe7 8. Nc3 c6 9. Bg5 b5 10. Nxb5 cxb5 11. Bxb5+ Nbd7 12. O-O-O Rd8 13. Rxd7 Rxd7 14. Rd1 Qe6 15. Bxd7+ Nxd7 16. Qb8+ Nxb8 17. Rd8# 1-0";
             let AronianVsAnand2013 = "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. e3 Nbd7 6. Bd3 dxc4 7. Bxc4 b5 8. Bd3 Bd6 9. O-O O-O 10. Qc2 Bb7 11. a3 Rc8 12. Ng5 c5 13. Nxh7 Ng4 14. f4 cxd4 15. exd4 Bc5 16. Be2 Nde5 17. Bxg4 Bxd4+ 18. Kh1 Nxg4 19. Nxf8 f5 20. Ng6 Qf6 21. h3 Qxg6 22. Qe2 Qh5 23. Qd3 Be3 0-1";
@@ -226,7 +230,6 @@
             
             CreateBoard();
             StartGame(pgn);
-
         }
         
         var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
@@ -420,35 +423,58 @@
         //     for (let j = 0; j < 8; j++) {
         //         console.log(board.tilemap[i][j]);
         //     }
-        // }
+        // }  
         }
 
-        function StartGame(pgnArray) {
+        async function StartGame(pgnArray) {
             for (var i = 0; i < pgnArray.length; i++) {
                 // ignore the 1., 2. elements
                 var colour = "white";
                 if (i % 3 == 0|| i == 0) continue;
+
+                await waitingSpaceKeypress();
                 
                 DoCommand(pgnArray[i], colour);
                 colour = (colour.includes("white")) ? "black": "white";
             }
             TriggerWin(pgnArray[pgnArray.length-1]);
         }
+        function waitingSpaceKeypress() {
+            return new Promise((resolve) => {
+                document.addEventListener("keydown", onKeyHandler);
+                function onKeyHandler(e) {
+                    if (e.keyCode === 0 || e.keyCode === 32) {
+                        document.removeEventListener('keydown', onKeyHandler);
+                        PlaySound();
+                        resolve();
+                    }
+                }
+            })
+        }
 
         function TriggerWin(winner) {
+            let textBox = document.getElementById("TextBox");
+            textBox.style.visibility = "visible";
+            textBox.style.position = "fixed";
+            textBox.style.left = "50%";
+            textBox.style.top = "20%";
             if (winner === "1-0") {
-                return;
+                textBox.innerHTML = "Checkmate: White wins";
             }
             else {
-                return;
+                textBox.innerHTML = "Checkmate: Black wins";
             }
         }
         
         var skipTestCheck = true;
         function DoCommand(command, colour) {
+            // document.getElementById("SoundButton").click();
             console.log("command: "+command);
             console.log(skipTestCheck);
-            if (skipTestCheck == false) TestCheck();
+            if (skipTestCheck == false) {
+                TestCheck();
+                skipTestCheck = true;
+            }
             // Check Contains (+: Check, #: Checkmate, 0-0-0: Castle Queen, 0-0: Castle King, =: Promote pawn, x: takes)
             if (command.includes('+')) {
                 // Handle Check
@@ -466,7 +492,7 @@
             }
             else if (command.includes('#')) {
                 // Handle Checkmate
-                DoCheckMate(colour);
+                DoCheck(colour);
                 // Remove '#'
                 command = command.replace('#', '');
                 // Call CheckCommand again
@@ -511,7 +537,6 @@
                 // Return
                 return;
             }
-
             DoBasicCommand(command, colour);
         }
 
@@ -530,7 +555,7 @@
         function DoCheck(colour) {
             // return;
             var kingPiece;
-            var highlightColour = checkTileColour;
+            let highlightColour = checkTileColour;
             if (colour.includes("white")) {
                 // Look for black King tile
                 // kingPiece = LookForPiece("K", "black");
@@ -546,11 +571,6 @@
                 // Highlight King tile
                 kingTile.getMesh().colour = highlightColour;
             }
-        }
-
-        function DoCheckMate(colour) {
-            DoCheck(colour);
-            // new Text to say checkmate;
         }
 
         function DoCastleQueen(colour) {
@@ -713,6 +733,14 @@
             // No need to return anything.
             return;
         }
+
+        function PlaySound() {
+            let path = '/sounds/check.mp3';
+            let ele = new Audio(path);
+            ele.play();
+        }
+
+        
     </script>
 </body>
 </html>
