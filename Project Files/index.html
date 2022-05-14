@@ -693,6 +693,35 @@
         //RANK = x = j
         //FILE = y = i
 
+        function tempRankSearch(piece, rank, file, rankPieceAt, filePieceAt, colour) {
+            if (board.tilemap[file][rank].getPiece().getType() == piece && board.tilemap[file][rank].getPiece().getColour() == colour)
+                if (!rankPieceAt == null)
+                    if (rankPieceAt == rank)
+                        return board.tilemap[file][rank].getPiece();
+                if (rankPieceAt == null)
+                    return board.tilemap[file][rank].getPiece();
+        }
+
+        function tempFileSearch(piece, rank, file, rankPieceAt, filePieceAt, colour) {
+            if (board.tilemap[file][rank].getPiece().getType() == piece && board.tilemap[file][rank].getPiece().getColour() == colour)
+                if (!filePieceAt == null)
+                        if (filePieceAt == file)
+                                return board.tilemap[file][rank].getPiece();
+                if (filePieceAt == null)
+                    return board.tilemap[file][rank].getPiece();
+        }
+
+        function tempBothSearch(piece, rank, file, rankPieceAt, filePieceAt, colour) {
+            if (board.tilemap[tempFilePos][tempRankPos].getPiece().getType() == piece && board.tilemap[file][rank].getPiece().getColour() == colour)
+                if (!filePieceAt == null)
+                    if (filePieceAt == file)
+                        return board.tilemap[file][rank].getPiece();
+                if (!rankPieceAt == null)
+                    if (rankPieceAt == rank)
+                        return board.tilemap[file][rank].getPiece();
+                if (filePieceAt == null)
+                    return board.tilemap[file][rank].getPiece();
+        }
         
         function LookForPiece(type, colour, rankToMove, fileToMove, rankPieceAt, filePieceAt, pawnCapture) {
             // if colour.incldes("white") 
@@ -739,21 +768,18 @@
                         while (!pieceFound)
                         {
                             tempRankPos = rankPos;
+                            tempFilePos = filePos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempRankPos - 1 > -1)
                                     tempRankPos--;
-                                    if (board.tilemap[filePos][tempRankPos].getPiece.getType = queen && board.tilemap[filePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[filePos][tempRankPos].getPiece;
-                                        if (rankPieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[filePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[filePos][tempRankPos].getPiece == null)
-                                        i = 7;
+                                    if (!tempRankSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempRankSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece() == null)
+                                    i = 7;
                                     
                             }
                         }
@@ -762,20 +788,17 @@
                         while (!pieceFound)
                         {
                             tempRankPos = rankPos;
+                            tempFilePos = filePos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempRankPos + 1 < 8)
                                     tempRankPos++;
-                                    if (board.tilemap[filePos][tempRankPos].getPiece.getType = queen && board.tilemap[filePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[filePos][tempRankPos].getPiece;
-                                        if (rankPieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[filePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[filePos][tempRankPos].getPiece == null)
+                                    if (!tempRankSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempRankSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -785,20 +808,17 @@
                         while (!pieceFound)
                         {
                             tempFilePos = filePos;
+                            tempRankPos = rankPos
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempFilePos + 1 < 9)
                                     tempFilePos++;
-                                    if (board.tilemap[tempFilePos][rankPos].getPiece.getType = queen && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][rankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempFileSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempFileSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -808,20 +828,17 @@
                         while (!pieceFound)
                         {
                             tempFilePos = filePos;
+                            tempRankPos = rankPos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempFilePos - 1 > 0)
                                     tempFilePos--;
-                                    if (board.tilemap[tempFilePos][rankPos].getPiece.getType = queen && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][rankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempFileSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempFileSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -838,19 +855,11 @@
                                 if (tempFilePos + 1 < 9 && tempRankPos - 1 > -1)
                                     tempFilePos++;
                                     tempRankPos--;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = queen && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }                                
@@ -867,19 +876,11 @@
                                 if (tempFilePos + 1 < 9 && tempRankPos + 1 < 8)
                                     tempFilePos++;
                                     tempRankPos++;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = queen && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }                                
@@ -896,19 +897,11 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos - 1 > -1)
                                     tempFilePos--;
                                     tempRankPos--;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = queen && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }                                
@@ -925,19 +918,11 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos + 1 < 8)
                                     tempFilePos--;
                                     tempRankPos++;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = queen && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(Q, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }                                
@@ -968,20 +953,17 @@
                         while (!pieceFound)
                         {
                             tempRankPos = rankPos;
+                            tempFilePos = filePos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempRankPos - 1 > -1)
                                     tempRankPos--;
-                                    if (board.tilemap[filePos][tempRankPos].getPiece.getType = rook && board.tilemap[filePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[filePos][tempRankPos].getPiece;
-                                        if (rankPieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[filePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[filePos][tempRankPos].getPiece == null)
+                                    if (!tempRankSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempRankSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -991,20 +973,17 @@
                         while (!pieceFound)
                         {
                             tempRankPos = rankPos;
+                            tempFilePos = filePos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempRankPos + 1 < 8)
                                     tempRankPos++;
-                                    if (board.tilemap[filePos][tempRankPos].getPiece.getType = rook && board.tilemap[filePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[filePos][tempRankPos].getPiece;
-                                        if (rankPieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[filePos][tempRankPos].getPiece;
-                                    if (!board.tilemap[filePos][tempRankPos].getPiece == null)
+                                    if (!tempRankSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempRankSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -1014,20 +993,17 @@
                         while (!pieceFound)
                         {
                             tempFilePos = filePos;
+                            tempRankPos = rankPos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempFilePos + 1 < 9)
                                     tempFilePos++;
-                                    if (board.tilemap[tempFilePos][rankPos].getPiece.getType = rook && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour) 
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][rankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempFileSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempFileSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -1037,20 +1013,17 @@
                         while (!pieceFound)
                         {
                             tempFilePos = filePos;
+                            tempRankPos = rankPos;
 
                             for (let i = 0; i < 7; i++)
                             {
                                 if (tempFilePos - 1 > 0)
                                     tempFilePos--;
-                                    if (board.tilemap[tempFilePos][rankPos].getPiece.getType = rook && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][rankPos].getPiece;
-                                    if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                    if (!tempFileSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempFileSearch(R, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
                                         i = 7;
                                     
                             }
@@ -1077,99 +1050,99 @@
 
                         //LEFT-UP
                         if (rankpos - 2 > -1 && filePos + 1 < 9) 
-                            if (board.tilemap[filePos + 1][rankLook - 2].getPiece.getType = knight && board.tilemap[filePos + 1][rankLook - 2].getPiece.getColour == colour)
+                            if (board.tilemap[filePos + 1][rankLook - 2].getPiece().getType() == 'N' && board.tilemap[filePos + 1][rankLook - 2].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos + 1][rankLook - 2].getRank = rankPieceAt)
-                                        return board.tilemap[filePos + 1][rankLook - 2].getPiece;
+                                    if (board.tilemap[filePos + 1][rankLook - 2].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos + 1][rankLook - 2].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos + 1][rankLook - 2].getFile = filePieceAt)
-                                        return board.tilemap[filePos + 1][rankLook - 2].getPiece;                           
+                                    if (board.tilemap[filePos + 1][rankLook - 2].getFile() = filePieceAt)
+                                        return board.tilemap[filePos + 1][rankLook - 2].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos + 1][rankLook - 2].getPiece;
+                                    return board.tilemap[filePos + 1][rankLook - 2].getPiece();
 
                         //LEFT-DOWN
                         if (rankpos - 2 > -1 && filePos - 1 > 0) 
-                            if (board.tilemap[filePos - 1][rankLook - 2].getPiece.getType = knight && board.tilemap[filePos - 1][rankLook - 2].getPiece.getColour == colour)
+                            if (board.tilemap[filePos - 1][rankLook - 2].getPiece().getType() == 'N' && board.tilemap[filePos - 1][rankLook - 2].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos - 1][rankLook - 2].getRank = rankPieceAt)
-                                        return board.tilemap[filePos - 1][rankLook - 2].getPiece;
+                                    if (board.tilemap[filePos - 1][rankLook - 2].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos - 1][rankLook - 2].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos - 1][rankLook - 2].getFile = filePieceAt)
-                                        return board.tilemap[filePos - 1][rankLook - 2].getPiece;                           
+                                    if (board.tilemap[filePos - 1][rankLook - 2].getFile() = filePieceAt)
+                                        return board.tilemap[filePos - 1][rankLook - 2].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos - 1][rankLook - 2].getPiece;
+                                    return board.tilemap[filePos - 1][rankLook - 2].getPiece();
  
                         //RIGHT-UP
                         if (rankpos + 2 < 8 && filePos + 1 < 9) 
-                            if (board.tilemap[filePos + 1][rankLook + 2].getPiece.getType = knight && board.tilemap[filePos + 1][rankLook + 2].getPiece.getColour == colour)
+                            if (board.tilemap[filePos + 1][rankLook + 2].getPiece().getType() == 'N' && board.tilemap[filePos + 1][rankLook + 2].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos + 1][rankLook + 2].getRank = rankPieceAt)
-                                        return board.tilemap[filePos + 1][rankLook + 2].getPiece;
+                                    if (board.tilemap[filePos + 1][rankLook + 2].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos + 1][rankLook + 2].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos + 1][rankLook + 2].getFile = filePieceAt)
-                                        return board.tilemap[filePos + 1][rankLook + 2].getPiece;                           
+                                    if (board.tilemap[filePos + 1][rankLook + 2].getFile() = filePieceAt)
+                                        return board.tilemap[filePos + 1][rankLook + 2].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos + 1][rankLook + 2].getPiece;
+                                    return board.tilemap[filePos + 1][rankLook + 2].getPiece();
  
                         //RIGHT-DOWN
                         if (rankpos + 2 < 8 && filePos - 1 > 0) 
-                            if (board.tilemap[filePos - 1][rankLook + 2].getPiece.getType = knight && board.tilemap[filePos - 1][rankLook + 2].getPiece.getColour == colour)
+                            if (board.tilemap[filePos - 1][rankLook + 2].getPiece().getType() == 'N' && board.tilemap[filePos - 1][rankLook + 2].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos - 1][rankLook + 2].getRank = rankPieceAt)
-                                        return board.tilemap[filePos - 1][rankLook + 2].getPiece;
+                                    if (board.tilemap[filePos - 1][rankLook + 2].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos - 1][rankLook + 2].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos - 1][rankLook + 2].getFile = filePieceAt)
-                                        return board.tilemap[filePos - 1][rankLook + 2].getPiece;                           
+                                    if (board.tilemap[filePos - 1][rankLook + 2].getFile() = filePieceAt)
+                                        return board.tilemap[filePos - 1][rankLook + 2].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos - 1][rankLook + 2].getPiece;
+                                    return board.tilemap[filePos - 1][rankLook + 2].getPiece();
  
                         //UP-LEFT
                         if (rankpos - 1 > -1 && filePos + 2 < 9) 
-                            if (board.tilemap[filePos + 2][rankLook - 1].getPiece.getType = knight && board.tilemap[filePos + 2][rankLook - 1].getPiece.getColour == colour)
+                            if (board.tilemap[filePos + 2][rankLook - 1].getPiece().getType() == 'N' && board.tilemap[filePos + 2][rankLook - 1].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos + 2][rankLook - 1].getRank = rankPieceAt)
-                                        return board.tilemap[filePos + 2][rankLook - 1].getPiece;
+                                    if (board.tilemap[filePos + 2][rankLook - 1].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos + 2][rankLook - 1].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos + 2][rankLook - 1].getFile = filePieceAt)
-                                        return board.tilemap[filePos + 2][rankLook - 1].getPiece;                           
+                                    if (board.tilemap[filePos + 2][rankLook - 1].getFile() = filePieceAt)
+                                        return board.tilemap[filePos + 2][rankLook - 1].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos + 2][rankLook - 1].getPiece;
+                                    return board.tilemap[filePos + 2][rankLook - 1].getPiece();
  
                         //UP-RIGHT
                         if (rankpos + 1 < 8 && filePos + 2 < 9) 
-                            if (board.tilemap[filePos + 2][rankLook + 1].getPiece.getType = knight && board.tilemap[filePos + 2][rankLook + 1].getPiece.getColour == colour)
+                            if (board.tilemap[filePos + 2][rankLook + 1].getPiece().getType() == 'N' && board.tilemap[filePos + 2][rankLook + 1].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos + 2][rankLook + 1].getRank = rankPieceAt)
-                                        return board.tilemap[filePos + 2][rankLook + 1].getPiece;
+                                    if (board.tilemap[filePos + 2][rankLook + 1].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos + 2][rankLook + 1].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos + 2][rankLook + 1].getFile = filePieceAt)
-                                        return board.tilemap[filePos + 2][rankLook + 1].getPiece;                           
+                                    if (board.tilemap[filePos + 2][rankLook + 1].getFile() = filePieceAt)
+                                        return board.tilemap[filePos + 2][rankLook + 1].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos + 2][rankLook + 1].getPiece;
+                                    return board.tilemap[filePos + 2][rankLook + 1].getPiece();
  
                         //DOWN-LEFT
                         if (rankpos - 1 > -1 && filePos - 2 > 0) 
-                            if (board.tilemap[filePos - 2][rankLook - 1].getPiece.getType = knight && board.tilemap[filePos - 2][rankLook - 1].getPiece.getColour == colour)
+                            if (board.tilemap[filePos - 2][rankLook - 1].getPiece().getType() == 'N' && board.tilemap[filePos - 2][rankLook - 1].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos - 2][rankLook - 1].getRank = rankPieceAt)
-                                        return board.tilemap[filePos - 2][rankLook - 1].getPiece;
+                                    if (board.tilemap[filePos - 2][rankLook - 1].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos - 2][rankLook - 1].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos - 2][rankLook - 1].getFile = filePieceAt)
-                                        return board.tilemap[filePos - 2][rankLook - 1].getPiece;                           
+                                    if (board.tilemap[filePos - 2][rankLook - 1].getFile() = filePieceAt)
+                                        return board.tilemap[filePos - 2][rankLook - 1].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos - 2][rankLook - 1].getPiece;
+                                    return board.tilemap[filePos - 2][rankLook - 1].getPiece();
  
                         //DOWN-RIGHT
                         if (rankpos + 1 < 8 && filePos - 2 > 0) 
-                            if (board.tilemap[filePos - 2][rankLook + 1].getPiece.getType = knight && board.tilemap[filePos - 2][rankLook + 1].getPiece.getColour == colour)
+                            if (board.tilemap[filePos - 2][rankLook + 1].getPiece().getType() == 'N' && board.tilemap[filePos - 2][rankLook + 1].getPiece().getColour() == colour)
                                 if (!rankPieceAt == null)
-                                    if (board.tilemap[filePos - 2][rankLook + 1].getRank = rankPieceAt)
-                                        return board.tilemap[filePos - 2][rankLook + 1].getPiece;
+                                    if (board.tilemap[filePos - 2][rankLook + 1].getRank() = rankPieceAt)
+                                        return board.tilemap[filePos - 2][rankLook + 1].getPiece();
                                 if (!filePieceAt == null)
-                                    if (board.tilemap[filePos - 2][rankLook + 1].getFile = filePieceAt)
-                                        return board.tilemap[filePos - 2][rankLook + 1].getPiece;                           
+                                    if (board.tilemap[filePos - 2][rankLook + 1].getFile() = filePieceAt)
+                                        return board.tilemap[filePos - 2][rankLook + 1].getPiece();                           
                                 if (rankPieceAt == null && filePieceAt == null)
-                                    return board.tilemap[filePos - 2][rankLook + 1].getPiece;
+                                    return board.tilemap[filePos - 2][rankLook + 1].getPiece();
  
                         pieceAtTile = true;
                                                    
@@ -1209,18 +1182,10 @@
                                 if (tempFilePos + 1 < 9 && tempRankPos - 1 > -1)
                                     tempFilePos++;
                                     tempRankPos--;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = bishop && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                     
@@ -1238,18 +1203,10 @@
                                 if (tempFilePos + 1 < 9 && tempRankPos + 1 < 8)
                                     tempFilePos++;
                                     tempRankPos++;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = bishop && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                     
@@ -1267,18 +1224,10 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos - 1 > -1)
                                     tempFilePos--;
                                     tempRankPos--;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = bishop && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                     
@@ -1296,18 +1245,10 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos + 1 < 8)
                                     tempFilePos--;
                                     tempRankPos++;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = bishop && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(B, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                     
@@ -1320,7 +1261,7 @@
 
 
                     break;
-                default:
+                default: //PAWN
 
                     if (colour == white)
                     {
@@ -1344,20 +1285,21 @@
                             while (!pieceFound)
                             {
                                 tempFilePos = filePos;
+                                tempRankPos = rankPos;
 
                                 for (let i = 1; i < 3; i++)
                                 {
                                     if (tempFilePos - 1 > 0)
                                         tempFilePos--;
-                                        if (board.tilemap[tempFilePos][rankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour)
+                                        if (board.tilemap[tempFilePos][tempRankPos].getPiece().getType() == 'P' && board.tilemap[tempFilePos][tempRankPos].getPiece().getColour() == colour)
                                             if (!filePieceAt == null)
                                                 if (filePieceAt == tempFilePos)
                                                     pieceFound = true; i = 3;
-                                                    return board.tilemap[tempFilePos][rankPos].getPiece;
+                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece();
                                             if (filePieceAt == null)
                                                 pieceFound = true; i = 3;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                                return board.tilemap[tempFilePos][tempRankPos].getPiece();
+                                        if (!board.tilemap[tempFilePos][tempRankPos].getPiece() == null)
                                             i = 3;
                                         
                                 }
@@ -1375,18 +1317,10 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos - 1 > -1)
                                     tempFilePos--;
                                     tempRankPos--;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                         
@@ -1403,18 +1337,10 @@
                                 if (tempFilePos - 1 > 0 && tempRankPos + 1 < 8)
                                     tempFilePos--;
                                     tempRankPos++;
-                                    if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                        if (!filePieceAt == null)
-                                            if (filePieceAt == tempFilePos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!rankPieceAt == null)
-                                            if (rankPieceAt == tempRankPos)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (filePieceAt == null)
-                                            pieceFound = true; i = 7;
-                                            return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                    if (!tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
                                     if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                         i = 7;
                                         
@@ -1445,20 +1371,21 @@
                             while (!pieceFound)
                             {
                                 tempFilePos = filePos;
+                                tempRankPos = rankPos;
 
                                 for (let i = 1; i < 3; i++)
                                 {
                                     if (tempFilePos + 1 < 9)
                                         tempFilePos++;
-                                        if (board.tilemap[tempFilePos][rankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][rankPos].getPiece.getColour == colour)
+                                        if (board.tilemap[tempFilePos][tempRankPos].getPiece().getType() == 'P' && board.tilemap[tempFilePos][rankPos].getPiece().getColour() == colour)
                                             if (!filePieceAt == null)
                                                 if (filePieceAt == tempFilePos)
                                                     pieceFound = true; i = 3;
-                                                    return board.tilemap[tempFilePos][rankPos].getPiece;
+                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece();
                                             if (filePieceAt == null)
                                                 pieceFound = true; i = 3;
-                                                return board.tilemap[tempFilePos][rankPos].getPiece;
-                                        if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
+                                                return board.tilemap[tempFilePos][tempRankPos].getPiece();
+                                        if (!board.tilemap[tempFilePos][tempRankPos].getPiece() == null)
                                             i = 3;
                                         
                                 }
@@ -1476,55 +1403,38 @@
                                     if (tempFilePos + 1 < 9 && tempRankPos - 1 > -1)
                                         tempFilePos++;
                                         tempRankPos--;
-                                        if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                            if (!filePieceAt == null)
-                                                if (filePieceAt == tempFilePos)
-                                                    pieceFound = true; i = 7;
-                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                            if (!rankPieceAt == null)
-                                                if (rankPieceAt == tempRankPos)
-                                                    pieceFound = true; i = 7;
-                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                            if (filePieceAt == null)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
+                                        if (!tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                        {
+                                            return tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                        }
                                         if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
                                             i = 7;
                                             
                                                                 
                                 }
 
-                                //DOWN-RIGHT
-                                while (!pieceFound)
-                                {
-                                    tempFilePos = filePos;
-                                    tempRankPos = rankPos;
+                            //DOWN-RIGHT
+                            while (!pieceFound)
+                            {
+                                tempFilePos = filePos;
+                                tempRankPos = rankPos;
 
 
-                                    if (tempFilePos + 1 < 9 && tempRankPos + 1 < 8)
-                                        tempFilePos++;
-                                        tempRankPos++;
-                                        if (board.tilemap[tempFilePos][tempRankPos].getPiece.getType = pawn && board.tilemap[tempFilePos][tempRankPos].getPiece.getColour == colour)
-                                            if (!filePieceAt == null)
-                                                if (filePieceAt == tempFilePos)
-                                                    pieceFound = true; i = 7;
-                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                            if (!rankPieceAt == null)
-                                                if (rankPieceAt == tempRankPos)
-                                                    pieceFound = true; i = 7;
-                                                    return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                            if (filePieceAt == null)
-                                                pieceFound = true; i = 7;
-                                                return board.tilemap[tempFilePos][tempRankPos].getPiece;
-                                        if (!board.tilemap[tempFilePos][rankPos].getPiece == null)
-                                            i = 7;
-                                            
-                                                                    
-                                } 
+                                if (tempFilePos + 1 < 9 && tempRankPos + 1 < 8)
+                                    tempFilePos++;
+                                    tempRankPos++;
+                                    if (!tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour) == null)
+                                    {
+                                        return tempBothSearch(P, tempRankPos, tempFilePos, rankPieceAt, filePieceAt, colour);
+                                    }
+                                    if (!board.tilemap[tempFilePos][tempRankPos].getPiece == null)
+                                        i = 7;
+                                        
+                                                                
+                            } 
                         }
                     }
 
-                    //Code for PAWN
             }
 
         }
@@ -1535,14 +1445,14 @@
             // New tile should reference piece.
             // No need to return anything.
 
-            let tempRank = target.getRank;
-            let tampFile = target.getFile;
+            let tempRank = target.getRank();
+            let tampFile = target.getFile();
 
-            target.setRank = endRank;
-            target.setFile = endFile;
+            target.setRank() = endRank;
+            target.setFile() = endFile;
 
-            board.tilemap[tempFile][tempRank].setPiece = null;
-            board.tilemap[endFile][endRank].setPiece = target;
+            board.tilemap[tempFile][tempRank].setPiece() = null;
+            board.tilemap[endFile][endRank].setPiece() = target;
 
 
             return;
