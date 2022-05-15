@@ -12,6 +12,9 @@
     <script src="js/three.js"> </script>
     <script src="js/OrbitControls.js"> </script>
     <script src="js/STLLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js" 
+    integrity="sha512-WoO4Ih0CDOSLYafy22wZD/mcJ7k0ESLqtQsFa6zFKnEUrbtuGU+GkLtVhgt93xa2qewG5gKEC6CWlN8OaCTSVg==" 
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
         body {
@@ -168,6 +171,53 @@
             }
         );
         
+        class ColorGUIHelper {
+            constructor(object, prop) {
+                this.object = object;
+                this.prop = prop;
+            }
+            get value() {
+                return `#${this.object[this.prop].getHexString()}`;
+            }
+            set value(hexString) {
+                this.object[this.prop].set(hexString);
+            }
+        }
+
+        //materials to be reused in the pieces
+        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
+        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
+
+       /*const glassColor = new THREE.TextureLoader().load('Textures/Glass/glassBasecolor.jpg');
+       const glassDisplacement = new THREE.TextureLoader().load('Textures/Glass/glassHeight.jpg');
+       const glassNormal = new THREE.TextureLoader().load('Textures/Glass/glassNormal.jpg');
+       const glassRoughness = new THREE.TextureLoader().load('Textures/Glass/glassRoughness.jpg');
+       const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
+       const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
+
+        var blackPieceMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0x303030),
+            map: glassColor,
+            normalMap: glassNormal,
+            displacementMap: glassDisplacement,
+            displacementScale: 0.05,
+            roughnessMap: glassRoughness,
+            roughness: 0.5,
+            
+        });
+
+        var whitePieceMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0x8f8f8f),
+            map: glassColor,
+            normalMap: glassNormal,
+            displacementMap: glassDisplacement,
+            displacementScale: 0.05,
+            roughnessMap: glassRoughness,
+            roughness: 0.5,
+            
+        }); */
+        
+
         function init() {
             
             // scene
@@ -192,17 +242,46 @@
                 camera.updateProjectionMatrix();
             });
 
-            // lights
-            var light = new THREE.PointLight(new THREE.Color(1,1,1), 1);
-            light.position.set(5,5,0)
+             // galaxy skybox
+            var skybox = new THREE.CubeTextureLoader().load([
+                "Skybox/Galaxy/space_bk.png",
+                "Skybox/Galaxy/space_dn.png",
+                "Skybox/Galaxy/space_ft.png",
+                "Skybox/Galaxy/space_lf.png",
+                "Skybox/Galaxy/space_rt.png",
+                "Skybox/Galaxy/space_up.png",
+            ])
+            scene.background = skybox;
+
+            // ambient light
+            const color = 0xFFFFFF;
+            const intensity = 1;
+            const light = new THREE.AmbientLight(color, intensity);
             scene.add(new THREE.AmbientLight(0x404040));
             scene.add(light);
+
+            // directional light
+            const dl = new THREE.DirectionalLight(0xffffff, 0.5);
+            dl.position.set(0, 2, 2);
+            scene.add(dl);
+
+            // gui
+            const gui = new dat.GUI();
             
+            // light intensity slider
+            const folderlight = gui.addFolder("Light");
+            folderlight.add(light, 'intensity', 0, 2, 0.1);
+            folderlight.add(dl.position, 'y', 0.1, 5, 0.1);
+
+            // color slider
+            const foldercolor = gui.addFolder("Color");
+            foldercolor.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+
             //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
             
             //axes. uncomment below line to show axes
-            scene.add(new THREE.AxesHelper(20));
+            //scene.add(new THREE.AxesHelper(20));
 
             // var geometry = new THREE.BoxGeometry(1, 1, 1);
             // var material = new THREE.MeshBasicMaterial({color: new THREE.Color(0xffffff)});
@@ -352,10 +431,6 @@
             moveArray = pgn.split(/\s+/);
             return moveArray;
         }
-
-        //materials to be reused in the pieces
-        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
-        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
 
         function CreatePiece(color, model, name, row, column) {
           // creates a piece cloning the model and set to a position in row, column
