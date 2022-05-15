@@ -195,7 +195,7 @@
        const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
        const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
 
-        var blackPieceMaterial = new THREE.MeshPhongMaterial({
+        var blackTileMaterial = new THREE.MeshPhongMaterial({
             color: new THREE.Color(0x303030),
             map: glassColor,
             normalMap: glassNormal,
@@ -206,18 +206,42 @@
             
         });
 
-        var whitePieceMaterial = new THREE.MeshPhongMaterial({
+        var whiteTileMaterial = new THREE.MeshPhongMaterial({
             color: new THREE.Color(0x8f8f8f),
             map: glassColor,
             normalMap: glassNormal,
             displacementMap: glassDisplacement,
             displacementScale: 0.05,
             roughnessMap: glassRoughness,
-            roughness: 0.5,
-            
+            roughness: 0.5,  
         }); */
-        
 
+       const glassColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
+       const glassDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
+       const glassNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
+       const glassRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
+        
+       var blackTileMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0x303030),
+            map: glassColor,
+            normalMap: glassNormal,
+            displacementMap: glassDisplacement,
+            displacementScale: 0.001,
+            roughnessMap: glassRoughness,
+            roughness: 0.1,
+            
+        });
+
+        var whiteTileMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0x8f8f8f),
+            map: glassColor,
+            normalMap: glassNormal,
+            displacementMap: glassDisplacement,
+            displacementScale: 0.001,
+            roughnessMap: glassRoughness,
+            roughness: 1,  
+        });
+        
         function init() {
             
             // scene
@@ -238,7 +262,7 @@
             // resize
             window.addEventListener('resize', function() {
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                camera.aspect = window.innerWidth, window.innerHeight;
+                camera.aspect = window.innerWidth/ window.innerHeight;
                 camera.updateProjectionMatrix();
             });
 
@@ -312,6 +336,7 @@
         var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
         var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
         var checkTileMaterial = new THREE.MeshBasicMaterial ({color: checkTileColour});
+
         function CreateBoard() {
 
             game_group = new THREE.Group();
