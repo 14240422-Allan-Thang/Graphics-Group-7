@@ -33,7 +33,7 @@
         <p>Chess Project</p>
     </div>
 
-    <button id="SoundButton" onclick="PlaySound()">Click Me</button>
+    <!-- <button id="SoundButton" onclick="PlaySound()">Click Me</button> -->
 
     <div id="TextBox" style="visibility:hidden"></div>
 
@@ -49,19 +49,19 @@
         /* StorePGN should write the proper pieces in the array board with the format of "BP0" for black pawn 0 */
         /* 
             B for black, W for white,
-            T for tower, H for knight, R for rook, K for king, Q for queen, P for pawn
+            R for rook, K for knight, B for bishop, K for king, Q for queen, P for pawn
             0 .. 7 the number of the pieces which are duplicated in each color,
             0 for the ones on the left hand, 1 for the ones on  the right hand, 
         */
         let pieceMap = [
-          ["BT0", "BH0", "BR0", "BQ", "BK", "BR1", "BH1", "BT1"],
+          ["BR0", "BN0", "BB0", "BQ", "BK", "BB1", "BN1", "BR1"],
           ["BP0", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"],
           ["", "", "", "", "", "", "", ""],
           ["", "", "", "", "", "", "", ""],
           ["", "", "", "", "", "", "", ""],
           ["", "", "", "", "", "", "", ""],
           ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5", "WP6", "WP7"],
-          ["WT0", "WH0", "WR0", "WQ", "WK", "WR1", "WH1", "WT1"]
+          ["WR0", "WN0", "WB0", "WQ", "WK", "WB1", "WN1", "WR1"]
         ];
         const Board = {
             tilemap: [],
@@ -142,6 +142,9 @@
             setMesh(value) {
                 this.mesh = value;
             }
+            updatePosition() {
+                this.mesh.position.set(FileToPos(this.tile.getFile()), 0, (RankToPos(this.tile.getRank()) * -1));
+            }
         }
 
         class TakenPieces {
@@ -185,8 +188,9 @@
             // camera
             var ratio = window.innerWidth/window.innerHeight;
             camera = new THREE.PerspectiveCamera(45,ratio,0.1,1000);
-            camera.position.set(10,10,10); //initial position of the camera
-            camera.lookAt(4,0,4);
+            camera.position.set(3.5,10,3); //initial position of the camera
+            camera.lookAt(3.5,0,-3.5);
+            camera.lookAt(3.5,0,-3.5);
             camera.updateProjectionMatrix();
 
             // resize
@@ -203,10 +207,10 @@
             scene.add(light);
             
             //controls
-            controls = new THREE.OrbitControls( camera, renderer.domElement );
+            // controls = new THREE.OrbitControls( camera, renderer.domElement );
             
             //axes. uncomment below line to show axes
-            scene.add(new THREE.AxesHelper(20));
+            // scene.add(new THREE.AxesHelper(20));
 
             // var geometry = new THREE.BoxGeometry(1, 1, 1);
             // var material = new THREE.MeshBasicMaterial({color: new THREE.Color(0xffffff)});
@@ -215,6 +219,7 @@
             // scene.add(mesh);
             
             let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
+            let basicGame = "1. h4 e5 2. e4 Bc5 3. Nc3 Qxh4 4. Nf3 Qxf2# 0-1";
             let KasparovVsTopalov1999 = "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Be3 Bg7 5. Qd2 c6 6. f3 b5 7. Nge2 Nbd7 8. Bh6 Bxh6 9. Qxh6 Bb7 10. a3 e5 11. O-O-O Qe7 12. Kb1 a6 13. Nc1 O-O-O 14. Nb3 exd4 15. Rxd4 c5 16. Rd1 Nb6 17. g3 Kb8 18. Na5 Ba8 19. Bh3 d5 20. Qf4+ Ka7 21. Rhe1 d4 22. Nd5 Nbxd5 23. exd5 Qd6 24. Rxd4 cxd4 25. Re7+ Kb6 26. Qxd4+ Kxa5 27. b4+ Ka4 28. Qc3 Qxd5 29. Ra7 Bb7 30. Rxb7 Qc4 31. Qxf6 Kxa3 32. Qxa6+ Kxb4 33. c3+ Kxc3 34. Qa1+ Kd2 35. Qb2+ Kd1 36. Bf1 Rd2 37. Rd7 Rxd7 38. Bxc4 bxc4 39. Qxh8 Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
             let MorphyVsAllies1858 = "1. e4 e5 2. Nf3 d6 3. d4 Bg4 4. dxe5 Bxf3 5. Qxf3 dxe5 6. Bc4 Nf6 7. Qb3 Qe7 8. Nc3 c6 9. Bg5 b5 10. Nxb5 cxb5 11. Bxb5+ Nbd7 12. O-O-O Rd8 13. Rxd7 Rxd7 14. Rd1 Qe6 15. Bxd7+ Nxd7 16. Qb8+ Nxb8 17. Rd8# 1-0";
             let AronianVsAnand2013 = "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. e3 Nbd7 6. Bd3 dxc4 7. Bxc4 b5 8. Bd3 Bd6 9. O-O O-O 10. Qc2 Bb7 11. a3 Rc8 12. Ng5 c5 13. Nxh7 Ng4 14. f4 cxd4 15. exd4 Bc5 16. Be2 Nde5 17. Bxg4 Bxd4+ 18. Kh1 Nxg4 19. Nxf8 f5 20. Ng6 Qf6 21. h3 Qxg6 22. Qe2 Qh5 23. Qd3 Be3 0-1";
@@ -226,7 +231,7 @@
             let RotlewivsRubinstein1997 = "1. d4 d5 2. Nf3 e6 3. e3 c5 4. c4 Nc6 5. Nc3 Nf6 6. dxc5 Bxc5 7. a3 a6 8. b4 Bd6 9. Bb2 O-O 10. Qd2 Qe7 11. Bd3 dxc4 12. Bxc4 b5 13. Bd3 Rd8 14. Qe2 Bb7 15. O-O Ne5 16. Nxe5 Bxe5 17. f4 Bc7 18. e4 Rac8 19. e5 Bb6+ 20. Kh1 Ng4 21. Be4 Qh4 22. g3 Rxc3 23. gxh4 Rd2 24. Qxd2 Bxe4+ 25. Qg2 Rh3 0-1";
             let GellervsEuwe1953 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 c5 5. a3 Bxc3+ 6. bxc3 b6 7. Bd3 Bb7 8. f3 Nc6 9. Ne2 O-O 10. O-O Na5 11. e4 Ne8 12. Ng3 cxd4 13. cxd4 Rc8 14. f4 Nxc4 15. f5 f6 16. Rf4 b5 17. Rh4 Qb6 18. e5 Nxe5 19. fxe6 Nxd3 20. Qxd3 Qxe6 21. Qxh7+ Kf7 22. Bh6 Rh8 23. Qxh8 Rc2 24. Rc1 Rxg2+ 25. Kf1 Qb3 26. Ke1 Qf3 0-1";
             
-            pgn = StorePGN(string);
+            pgn = StorePGN(MorphyVsAllies1858);
             
             CreateBoard();
             StartGame(pgn);
@@ -247,19 +252,19 @@
                     var tileMaterial;
                     if (j % 2) {
                         if (i % 2) {
-                            tileColour = "black";
+                            tileColour = 'B';
                             tileMaterial = blackTileMaterial;
                         } else {
-                            tileColour = "white";
+                            tileColour = 'W';
                             tileMaterial = whiteTileMaterial;
                         }
                     } else {
                         if (i % 2) {
-                            tileColour = "white";
+                            tileColour = 'W';
                             tileMaterial = whiteTileMaterial;
                             tile.setColour(whiteTileColour);
                         } else {
-                            tileColour = "black";
+                            tileColour = 'B';
                             tileMaterial = blackTileMaterial;
                         }
                     }
@@ -320,7 +325,7 @@
         }
 
         function FileToPos(file) {
-            var files = ['a','b','c','d','e','f','g','h'];
+            let files = ['a','b','c','d','e','f','g','h'];
             return files.indexOf(file);
         }
 
@@ -329,6 +334,8 @@
         }
 
         function PosToFile(pos) {
+            if (pos > 7) pos = 7;
+            else if (pos < 0) pos = 0;
             var files = ['a','b','c','d','e','f','g','h'];
             return files[pos];
         }
@@ -345,7 +352,7 @@
         // animation loop
         function animate() {
             renderer.render(scene, camera);
-            controls.update();
+            // controls.update();
             requestAnimationFrame(animate);
         }
 
@@ -363,13 +370,13 @@
         function CreatePiece(color, model, name, row, column) {
           // creates a piece cloning the model and set to a position in row, column
           var pieces;
-          if (color === "W") {
+          if (color === 'W') {
             pieces = white_pieces; // set to the list of white's pieces
             pieces[name] = model.clone(); 
             pieces[name].material = whitePieceMaterial; 
             pieces[name].position.set(row, 0, -column); // assign the position 
             game_group.add(pieces[name]);
-        } else if (color === "B") {
+        } else if (color === 'B') {
             pieces = black_pieces; // set to the list of black's pieces
             pieces[name] = model.clone(); 
             pieces[name].material = blackPieceMaterial; 
@@ -397,22 +404,22 @@
               let tile = board.tilemap[j][i];
               var newPiece;
               switch (piece) {
-                case "P":
+                case 'P':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_pawn, name, j, i), color);
                     break;
-                case "K":
+                case 'K':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_king, name, j, i), color);
                     break;
-                case "H":
+                case 'N':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_knight, name, j, i), color);
                     break;
-                case "T":
+                case 'R':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_rook, name, j, i), color);
                     break;
-                case "Q":
+                case 'Q':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_queen, name, j, i), color);
                     break;
-                case "R":
+                case 'B':
                     newPiece = new Piece(piece, tile, CreatePiece(color, model_bishop, name, j, i), color);
                     break;
               }
@@ -427,15 +434,15 @@
         }
 
         async function StartGame(pgnArray) {
-            for (var i = 0; i < pgnArray.length; i++) {
+            let colour = 'W';
+            for (var i = 0; i < pgnArray.length-1; i++) {
                 // ignore the 1., 2. elements
-                var colour = "white";
                 if (i % 3 == 0|| i == 0) continue;
 
                 await waitingSpaceKeypress();
                 
                 DoCommand(pgnArray[i], colour);
-                colour = (colour.includes("white")) ? "black": "white";
+                colour = (colour === 'W') ? 'B': 'W';
             }
             TriggerWin(pgnArray[pgnArray.length-1]);
         }
@@ -469,8 +476,7 @@
         var skipTestCheck = true;
         function DoCommand(command, colour) {
             // document.getElementById("SoundButton").click();
-            console.log("command: "+command);
-            console.log(skipTestCheck);
+            console.log("DoCommand: "+command);
             if (skipTestCheck == false) {
                 TestCheck();
                 skipTestCheck = true;
@@ -501,13 +507,13 @@
                 return;
             }
             
-            if (command.includes("0-0-0")) {
+            if (command.includes("O-O-O")) {
                 // Handle Castle Queen
                 DoCastleQueen(colour);
                 // Return
                 return;
             }
-            else if (command.includes("0-0")) {
+            else if (command.includes("O-O")) {
                 // Handle Castle King
                 DoCastleKing(colour);
                 // Return
@@ -555,29 +561,45 @@
         function DoCheck(colour) {
             // return;
             var kingPiece;
+            var kingTile;
             let highlightColour = checkTileColour;
-            if (colour.includes("white")) {
+            let breakLoop = false;
+            if (colour === 'W') {
                 // Look for black King tile
-                // kingPiece = LookForPiece("K", "black");
-                kingPiece = FindTile('e', 1).getPiece();
-                let kingTile = kingPiece.getTile();
-                // Highlight King tile
-                kingTile.getMesh().material = checkTileMaterial;
+                for (let i = 0; i < 8; i++) {
+                    if (breakLoop) break;
+                    for (let j = 0; j < 8; j++) {
+                        if (breakLoop) break;
+                        kingPiece = board.tilemap[i][j].getPiece();
+                        if (!kingPiece || kingPiece.getType() != 'K' || kingPiece.getColour() != 'B') continue;
+                        breakLoop = true;
+                    }
+                }
+                kingTile = kingPiece.getTile();
             }
             else {
                 // Look for white King
-                kingPiece = LookForPiece("K", "white");
-                let kingTile = kingPiece.getTile();
-                // Highlight King tile
-                kingTile.getMesh().colour = highlightColour;
+                for (let i = 0; i < 8; i++) {
+                    if (breakLoop) break;
+                    for (let j = 0; j < 8; j++) {
+                        if (breakLoop) break;
+                        kingPiece = board.tilemap[i][j].getPiece();
+                        if (!kingPiece || kingPiece.getType() != 'K' || kingPiece.getColour() != 'W') continue;
+                        breakLoop = true;
+                    }
+                }
+                kingTile = kingPiece.getTile();
             }
+            console.log(kingTile);
+            // Highlight King tile
+            kingTile.getMesh().material = checkTileMaterial;
         }
 
         function DoCastleQueen(colour) {
             var kingPiece;
             var rookPiece;
             // if white
-            if (colour.includes("white")) {
+            if (colour === 'W') {
                 // Find King
                 kingPiece = FindTile('e', 1).piece;
                 // Find Rook
@@ -599,7 +621,7 @@
             var kingPiece;
             var rookPiece;
             // if white
-            if (colour.includes("white")) {
+            if (colour === 'W') {
                 // Find King
                 kingPiece = FindTile('e', 1).piece;
                 // Find Rook
@@ -620,7 +642,7 @@
         function DoPromotePawn(command, colour) {
             let newPieceType = command.charAt(command.length - 1);
             var rank;
-            if (colour.includes("white")) {
+            if (colour === 'W') {
                 rank = 7;
             }
             else {
@@ -635,59 +657,74 @@
         }
 
         function DoTakePiece(colour, takenTile) {
-            return; // REMOVE THIS WHEN DONE
+            // REMOVE THIS WHEN DONE
+            // return;
             // Remove piece at takenTile
             // Move it to TakenPieces of same colour
-            takenTile.getPiece().getMesh().position.set(10,0,0);
+            takenTile.getPiece().getMesh().position.set(3.5,-2,-3.5);
+            scene.remove(takenTile.getPiece().getMesh());
+            takenTile.setPiece(undefined);
         }
 
         function DoBasicCommand(command, colour) {
-            // endRank/y-axis = last char
-            var endRank = command.charAt(command.length - 1);
             // endFile/x-axis = 2nd last char
-            var endFile = command.charAt(command.length - 2);
+            let endFile = command.charAt(command.length - 2);
+            // endRank/y-axis = last char
+            let endRank = parseInt(command.charAt(command.length - 1));
 
             // target = piece to move
             var target;
+            console.log("DoBasicCommand: " + command + ", Colour: " + colour);
+            var disambiguator;
 
             // if 2 char -- e4
             if (command.length == 2) {
-                var tile; 
+                let pawnRank = endRank - 1;
+                var tempTile;
                 // Look for Pawn
                 // Set target to Pawn
-                if (colour.includes("white")) {
-                    target = FindTile(endFile.toString(), (--endRank)).piece;
+                if (colour === 'W') {
+                    tempTile = FindTile(endFile, endRank - 1);
+                    if (tempTile.getPiece() == undefined) tempTile = FindTile(endFile, endRank - 2);
+                    target = tempTile.getPiece();
                 }
                 else {
-                    target = FindTile('endFile', (endRank + 1)).piece;
+                    tempTile = FindTile(endFile, endRank + 1);
+                    if (tempTile.getPiece() == undefined) tempTile = FindTile(endFile, endRank + 2);
+                    target = tempTile.getPiece();
                 }
             }
-            // if 3 char -- Qe4
+            // if 3 char -- Qe4 / de4
             else if (command.length == 3) {
                 // Look for piece of type 1st char
                 // Type of piece is specified in first char as UpperCase
                 var type = command.charAt(0);
                 if (IsUpperCase(type)) {
-                    target = LookForPiece(type, colour);
+                    target = LookForPieceToMove(type, colour, endFile, endRank);
                 }
                 // If type is not UpperCase, type must be pawn and file is specified
                 else {
-                    target = LookForPiece();
+                    disambiguator = command.charAt(0);
+                    target = LookForPieceToMove('P', colour, endFile, endRank, disambiguator);
                 }
             }
             // if 4 char -- Qde4/Q3e4
             else if (command.length == 4) {
+                let type = command.charAt(0);
                 // Look for piece of type 1st char on 2nd char rank/file
-                var disambiguator = command.charAt(1);
+                disambiguator = command.charAt(1);
+                if (!(/[a-h]/).test(disambiguator)) disambiguator = parseInt(disambiguator);
+
+                target = LookForPieceToMove(type, colour, endFile, endRank, disambiguator);
                 // If 2nd character is a a-h, find piece on that file
-                if ((/[a-h]/).test(disambiguator)) {
-                    var file = disambiguator;
-                }
-                // Else 2nd character is 1-8. find piece on that rank
-                else {
-                    var rank = disambiguator;
-                }
-                target = LookForPiece();
+                // if ((/[a-h]/).test(disambiguator)) {
+                //     var file = disambiguator;
+                // }
+                // // Else 2nd character is 1-8. find piece on that rank
+                // else {
+                //     var rank = disambiguator;
+                // }
+                // target = LookForPiece(type, colour, endFile, endRank, disambiguator);
             }
             // if 5 char -- Qd3e4
             else {
@@ -709,21 +746,238 @@
         // This function will always be called with both type paramanter as a single upper-case character eg, "R"
         // and colour paramater as a string, either "white" or "black"
         // Function should return the reference to the piece.
-        function LookForPiece(type, colour) {
+        function LookForPieceToMove(type, colour, endFile, endRank, disambiguator) {
             // if colour.incldes("white") 
             // Look for white piece
             // else
             // look for black piece
+            var pieceToReturn;
+            let mult = 1;
+            let stopN = false;
+            let stopNE = false;
+            let stopE = false;
+            let stopSE = false;
+            let stopS = false;
+            let stopSW = false;
+            let stopW = false;
+            let stopNW = false;
             switch (type) {
+                // look for king
                 case 'K':
-                    //do something
+                    // from tile, look in every direction once
+                    // if you are in bounds, search in that direction for the 
+                    if (endRank != 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'h' && endRank != 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endRank != 8) pieceToReturn = SearchE(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'h' && endRank != 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endRank != 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'a' && endRank != 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'a' && endRank != 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult);    
                     break;
+                // look for queen
                 case 'Q':
-                    break;
-                default:
-                    return;
-            }
+                    // from tile, look N,NE,E,SE,S,SW,W,NW until found
+                    while (!pieceToReturn) {
 
+                        if (!stopN && !pieceToReturn && (endRank + mult-1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
+                        if (endFile === 'd' && endRank == 3) console.log(pieceToReturn);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopN = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank - mult+1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopS && !pieceToReturn && (endRank - mult+1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopS = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank - mult+1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank + mult-1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (mult > 7) break;
+                        mult++;
+                    }
+
+                    break;
+                // look for rook
+                case 'R':
+                    // from tile, look N,E,S,W until found
+                    while (!pieceToReturn ) {
+                        if (!stopN && !pieceToReturn && (endRank + mult-1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopN = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopS && !pieceToReturn && (endRank - mult+1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopS = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        mult++;
+                    }
+
+                    break;
+                // look for bishop
+                case 'B':
+                    // from tile, look NE,SE,SW,NW
+                    while (!pieceToReturn) {
+                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true); console.log("NE" + mult + ": " + pieceToReturn);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank - mult+1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSE = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank - mult+1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank + mult-1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNW = true;}
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                        mult++;
+                    }
+
+                    break;
+                // look for knight
+                case 'N':
+                    // from tile, look in L
+                    if (endFile != 'g' && endFile != 'h' && endRank < 8) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, 1);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'a' && endFile != 'b' && endRank > 1) pieceToReturn = SearchKnight1(type,colour, endFile, endRank, -1);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'h' && endRank < 7) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, 2);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'a' && endRank > 2) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, -2);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+
+                    if (!pieceToReturn && endFile != 'a' && endFile != 'b' && endRank < 8) pieceToReturn = SearchKnight2(type, colour, endFile, endRank, 1);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'g' && endFile != 'h' && endRank > 1) pieceToReturn = SearchKnight2(type, colour, endFile, endRank, -1);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'a' && endRank < 7) pieceToReturn = SearchKnight2(type, colour, endFile, endRank, 2);
+                    if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    if (!pieceToReturn && endFile != 'h' && endRank > 2) pieceToReturn = SearchKnight2(type, colour, endFile, endRank, -2);
+
+                    break;
+                // look for pawn
+                default:
+                    // from tile, look above
+                    if (colour === 'W') {
+                        if (endFile != 'h' && endRank > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult);
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                        if (!pieceToReturn && endFile != 'a' && endRank > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult);
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    }
+                    else {
+                        if (endFile != 'h' && endRank < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult);
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                        if (!pieceToReturn && endFile != 'a' && endRank < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult);
+                        if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
+                    }
+                    
+                    break;
+                }
+
+            return pieceToReturn;
+        }
+
+        function SearchTile(type, colour, file, rank, fileOffset, rankOffset) {
+            let newFile = PosToFile(FileToPos(file) + fileOffset);
+            let newRank = rank + rankOffset;
+            
+            return FindTile(newFile, newRank).getPiece();
+        }
+
+        function SearchN(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 0*mult, 1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchNE(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, 1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchE(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, 0*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchSE(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, -1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchS(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 0*mult, -1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchSW(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, -1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchW(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, 0*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchNW(type, colour, endFile, endRank, mult, looped) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, 1*mult);
+            if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchKnight1(type, colour, endFile, endRank, mult) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 2/mult, 1*mult);
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function SearchKnight2(type, colour, endFile, endRank, mult) {
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -2/mult, 1*mult);
+            return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
+        }
+
+        function CheckDisambiguator(pieceToCheck, disambiguator) {
+            if (!pieceToCheck) return true;
+            if (!disambiguator) return true;
+            return ((pieceToCheck.getTile().getFile() === disambiguator || pieceToCheck.getTile().getRank() === disambiguator)) ? true : false;
         }
 
         function MovePiece(target, endFile, endRank) {
@@ -731,7 +985,10 @@
             // Old tile should dereference the piece.
             // New tile should reference piece.
             // No need to return anything.
-            return;
+            target.getTile().setPiece(undefined);
+            target.setTile(FindTile(endFile, endRank));
+            target.getTile().setPiece(target);
+            target.updatePosition();
         }
 
         function PlaySound() {
@@ -739,8 +996,6 @@
             let ele = new Audio(path);
             ele.play();
         }
-
-        
     </script>
 </body>
 </html>
