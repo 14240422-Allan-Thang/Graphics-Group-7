@@ -389,48 +389,41 @@
 
         function PlacePieces() {
           // two-loop for assigning each piece in the board
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              let name = pieceMap[7-i][j]; //  get the piece position from the corresponding cell in the board 2d array
-              if (name === "") {
-                continue;
-              }
-              let color = name.charAt(0); // get the color, W or B
-              let piece = name.charAt(1); // get the piece type, P, K, H, T, Q, R
-              let number = name.charAt(2); // get the corresponding identifier number
-
-            //   console.log({ color, piece, number })
-              
-              let tile = board.tilemap[j][i];
-              var newPiece;
-              switch (piece) {
-                case 'P':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_pawn, name, j, i), color);
-                    break;
-                case 'K':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_king, name, j, i), color);
-                    break;
-                case 'N':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_knight, name, j, i), color);
-                    break;
-                case 'R':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_rook, name, j, i), color);
-                    break;
-                case 'Q':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_queen, name, j, i), color);
-                    break;
-                case 'B':
-                    newPiece = new Piece(piece, tile, CreatePiece(color, model_bishop, name, j, i), color);
-                    break;
-              }
-              tile.setPiece(newPiece);
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    let name = pieceMap[7-i][j]; //  get the piece position from the corresponding cell in the board 2d array
+                    if (name === "") {
+                        continue;
+                    }
+                    let color = name.charAt(0); // get the color, W or B
+                    let piece = name.charAt(1); // get the piece type, P, K, H, T, Q, R
+                    let number = name.charAt(2); // get the corresponding identifier number
+                    
+                    let tile = board.tilemap[j][i];
+                    var newPiece;
+                    switch (piece) {
+                        case 'P':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_pawn, name, j, i), color);
+                            break;
+                        case 'K':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_king, name, j, i), color);
+                            break;
+                        case 'N':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_knight, name, j, i), color);
+                            break;
+                        case 'R':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_rook, name, j, i), color);
+                            break;
+                        case 'Q':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_queen, name, j, i), color);
+                            break;
+                        case 'B':
+                            newPiece = new Piece(piece, tile, CreatePiece(color, model_bishop, name, j, i), color);
+                            break;
+                    }
+                    tile.setPiece(newPiece);
+                }
             }
-        }
-        // for (let i = 0; i < 8; i++) {
-        //     for (let j = 0; j < 8; j++) {
-        //         console.log(board.tilemap[i][j]);
-        //     }
-        // }  
         }
 
         async function StartGame(pgnArray) {
@@ -475,8 +468,6 @@
         
         var skipTestCheck = true;
         function DoCommand(command, colour) {
-            // document.getElementById("SoundButton").click();
-            console.log("DoCommand: "+command);
             if (skipTestCheck == false) {
                 TestCheck();
                 skipTestCheck = true;
@@ -590,7 +581,6 @@
                 }
                 kingTile = kingPiece.getTile();
             }
-            console.log(kingTile);
             // Highlight King tile
             kingTile.getMesh().material = checkTileMaterial;
         }
@@ -674,7 +664,6 @@
 
             // target = piece to move
             var target;
-            console.log("DoBasicCommand: " + command + ", Colour: " + colour);
             var disambiguator;
 
             // if 2 char -- e4
@@ -781,7 +770,6 @@
                     while (!pieceToReturn) {
 
                         if (!stopN && !pieceToReturn && (endRank + mult-1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
-                        if (endFile === 'd' && endRank == 3) console.log(pieceToReturn);
                         if (pieceToReturn == true) {pieceToReturn = undefined; stopN = true;}
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
@@ -846,7 +834,7 @@
                 case 'B':
                     // from tile, look NE,SE,SW,NW
                     while (!pieceToReturn) {
-                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true); console.log("NE" + mult + ": " + pieceToReturn);
+                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
                         if (pieceToReturn == true) {pieceToReturn = undefined; stopNE = true;}
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
