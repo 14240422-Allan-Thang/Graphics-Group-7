@@ -187,6 +187,63 @@
         //materials to be reused in the pieces
         var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
         var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
+        //var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
+        //var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
+
+       const waterColor = new THREE.TextureLoader().load('Textures/Water/Water_002_COLOR.jpg');
+       const waterNormal = new THREE.TextureLoader().load('Textures/Water/Water_002_NORM.jpg');
+       const waterDisplacement = new THREE.TextureLoader().load('Textures/Water/Water_002_DISP.jpg');
+       const waterRoughness = new THREE.TextureLoader().load('Textures/Water/Water_002_OCC.jpg');
+       const waterAmbient = new THREE.TextureLoader().load('Textures/Water/Water_002_ROUGH.jpg');
+
+        var blackTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x303030),
+            map: waterColor,
+            normalMap: waterNormal,
+            displacementMap: waterDisplacement,
+            displacementScale: 0.05,
+            roughnessMap: waterRoughness,
+            roughness: 0.5,
+            aoMap: waterAmbient
+            
+        });
+
+        var whiteTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x8f8f8f),
+            map: waterColor,
+            normalMap: waterNormal,
+            displacementMap: waterDisplacement,
+            displacementScale: 0.05,
+            roughnessMap: waterRoughness,
+            roughness: 0.5,
+            aoMap: waterAmbient  
+        });
+
+       /*const woodColor = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_COLOR.png');
+       const woodNormal = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_NORM.png');
+       const woodRoughness = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_ROUGH.png');
+       const woodAmbient = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_OCC.png');
+
+        var blackTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x303030),
+            map: woodColor,
+            normalMap: woodNormal,
+            //displacementMap: glassDisplacement,
+            //displacementScale: 0.05,
+            roughnessMap: woodRoughness,
+            roughness: 0.5,
+            
+        });
+
+        var whiteTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x8f8f8f),
+            map: woodColor,
+            normalMap: woodNormal,
+            //displacementMap: glassDisplacement,
+            //displacementScale: 0.05,
+            roughnessMap: woodRoughness,
+            roughness: 0.5,  
+        });*/
 
        /*const glassColor = new THREE.TextureLoader().load('Textures/Glass/glassBasecolor.jpg');
        const glassDisplacement = new THREE.TextureLoader().load('Textures/Glass/glassHeight.jpg');
@@ -195,7 +252,7 @@
        const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
        const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
 
-        var blackTileMaterial = new THREE.MeshPhongMaterial({
+        var blackTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x303030),
             map: glassColor,
             normalMap: glassNormal,
@@ -206,7 +263,7 @@
             
         });
 
-        var whiteTileMaterial = new THREE.MeshPhongMaterial({
+        var whiteTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x8f8f8f),
             map: glassColor,
             normalMap: glassNormal,
@@ -214,33 +271,35 @@
             displacementScale: 0.05,
             roughnessMap: glassRoughness,
             roughness: 0.5,  
-        }); */
+        });*/ 
 
-       const glassColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
-       const glassDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
-       const glassNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
-       const glassRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
+       /*const marbleColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
+       const marbleDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
+       const marbleNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
+       const marbleRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
         
-       var blackTileMaterial = new THREE.MeshPhongMaterial({
+       var blackTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x303030),
-            map: glassColor,
-            normalMap: glassNormal,
-            displacementMap: glassDisplacement,
-            displacementScale: 0.001,
-            roughnessMap: glassRoughness,
+            map: marbleColor,
+            normalMap: marbleNormal,
+            displacementMap: marbleDisplacement,
+            displacementScale: 0.0001,
+            roughnessMap:marbleRoughness,
             roughness: 0.1,
             
         });
 
-        var whiteTileMaterial = new THREE.MeshPhongMaterial({
+        var whiteTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x8f8f8f),
-            map: glassColor,
-            normalMap: glassNormal,
-            displacementMap: glassDisplacement,
-            displacementScale: 0.001,
-            roughnessMap: glassRoughness,
-            roughness: 1,  
-        });
+            map: marbleColor,
+            normalMap: marbleNormal,
+            displacementMap: marbleDisplacement,
+            displacementScale: 0.0001,
+            roughnessMap: marbleRoughness,
+            roughness: 0.1,  
+        }); */
+
+        let skyboxGeo;
         
         function init() {
             
@@ -266,8 +325,8 @@
                 camera.updateProjectionMatrix();
             });
 
-             // galaxy skybox
-            var skybox = new THREE.CubeTextureLoader().load([
+            // galaxy skybox
+            /*var skybox = new THREE.CubeTextureLoader().load([
                 "Skybox/Galaxy/space_bk.png",
                 "Skybox/Galaxy/space_dn.png",
                 "Skybox/Galaxy/space_ft.png",
@@ -275,7 +334,42 @@
                 "Skybox/Galaxy/space_rt.png",
                 "Skybox/Galaxy/space_up.png",
             ])
-            scene.background = skybox;
+            scene.background = skybox;*/
+
+            // interstellarr skybox
+            /*var interskybox = new THREE.CubeTextureLoader().load([
+            "Skybox/Interstellar/front.png",
+            "Skybox/Interstellar/back.png",
+            "Skybox/Interstellar/up.png",
+            "Skybox/Interstellar/down.png",
+            "Skybox/Interstellar/right.png",
+            "Skybox/Interstellar/left.png"
+            ])
+            scene.background = interskybox;*/
+
+            // cloudy skybox
+            /*var cloudyskybox = new THREE.CubeTextureLoader().load([
+            "Skybox/Cloudy/bluecloud_bk.jpg",
+            "Skybox/Cloudy/bluecloud_dn.jpg",
+            "Skybox/Cloudy/bluecloud_ft.jpg",
+            "Skybox/Cloudy/bluecloud_lf.jpg",
+            "Skybox/Cloudy/bluecloud_rt.jpg",
+            "Skybox/Cloudy/bluecloud_up.jpg"
+            ])
+            scene.background = cloudyskybox;*/
+
+            // sunset skybox
+
+            var sunsetskybox = new THREE.CubeTextureLoader().load([
+            "Skybox/Sunset/yellowcloud_bk.jpg",
+            "Skybox/Sunset/yellowcloud_dn.jpg",
+            "Skybox/Sunset/yellowcloud_ft.jpg",
+            "Skybox/Sunset/yellowcloud_lf.jpg",
+            "Skybox/Sunset/yellowcloud_rt.jpg",
+            "Skybox/Sunset/yellowcloud_up.jpg"
+            ])
+            scene.background = sunsetskybox;
+
 
             // ambient light
             const color = 0xFFFFFF;
@@ -291,6 +385,8 @@
 
             // gui
             const gui = new dat.GUI();
+
+            var parameters = { v: 0};
             
             // light intensity slider
             const folderlight = gui.addFolder("Light");
@@ -298,8 +394,24 @@
             folderlight.add(dl.position, 'y', 0.1, 5, 0.1);
 
             // color slider
-            const foldercolor = gui.addFolder("Color");
-            foldercolor.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+            const folderpieces = gui.addFolder("Pieces");
+            
+            folderpieces.addColor(new ColorGUIHelper(whitePieceMaterial, 'color'), 'value').name('WhitePiece');
+            folderpieces.addColor(new ColorGUIHelper(blackPieceMaterial, 'color'), 'value').name('BlackPiece');
+
+            const folderboard = gui.addFolder("Board");
+            folderboard.addColor(new ColorGUIHelper(blackTileMaterial, 'color'), 'value').name('BlackTile');
+            folderboard.addColor(new ColorGUIHelper(whiteTileMaterial, 'color'), 'value').name('WhiteTile');
+            
+            
+            const folderbackground = gui.addFolder("Background");
+            var stringList = ["One", "Two", "Three"];
+            folderbackground.add(parameters, 'v', stringList).name('Skyboxes');
+
+            const folderTextures = gui.addFolder("Textures");
+            var stringLists = ["One", "Two", "Three"];
+            folderTextures.add(parameters, 'v', stringLists).name('Textures');
+
 
             //controls
             controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -333,8 +445,6 @@
         }
         
         var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
-        var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
-        var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
         var checkTileMaterial = new THREE.MeshBasicMaterial ({color: checkTileColour});
 
         function CreateBoard() {
