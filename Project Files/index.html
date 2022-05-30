@@ -1,20 +1,27 @@
 <html>
+
 <head>
     <title>Chess Project</title>
 </head>
 
 <style>
-    body {margin: 0;}
-    canvas {width: 100%; height: 100%}
+    body {
+        margin: 0;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%
+    }
 </style>
 
 <body>
     <script src="js/three.js"> </script>
     <script src="js/OrbitControls.js"> </script>
-    <script src="js/STLLoader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js" 
-    integrity="sha512-WoO4Ih0CDOSLYafy22wZD/mcJ7k0ESLqtQsFa6zFKnEUrbtuGU+GkLtVhgt93xa2qewG5gKEC6CWlN8OaCTSVg==" 
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="js/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"
+        integrity="sha512-WoO4Ih0CDOSLYafy22wZD/mcJ7k0ESLqtQsFa6zFKnEUrbtuGU+GkLtVhgt93xa2qewG5gKEC6CWlN8OaCTSVg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
         body {
@@ -24,6 +31,7 @@
             margin: 0px;
             overflow: hidden;
         }
+
         #info {
             position: absolute;
             top: 10px;
@@ -32,18 +40,61 @@
         }
     </style>
 
-    <!-- <button id="SoundButton" onclick="PlaySound()">Click Me</button> -->
+    <button id="info" onclick="PlaySound()">Click Me</button>
+    <div><button id="info" onclick="">Play</button></div>
 
     <div id="TextBox" style="visibility:hidden"></div>
 
     <script>
-        
+
         //holds the pieces of each player, whites and blacks
-        var black_pieces={};
-        var white_pieces={};
+        var black_pieces = {};
+        var white_pieces = {};
         let whiteTileColour = new THREE.Color(0xffffff);
         let blackTileColour = new THREE.Color(0x000000);
         let checkTileColour = new THREE.Color(0xd61b1b);
+
+        const textureLoader = new THREE.TextureLoader();
+        let pieceTextures = {};
+
+        var scene, camera, renderer;
+        let loader = new THREE.GLTFLoader();
+        let material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
+        var board, game_group;
+
+        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
+        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
+
+
+        var blackTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x303030),
+            // map: pieceTextures["Wood"].color,
+            // normalMap: woodNormal,
+            //displacementMap: woodDisplacement,
+            //displacementScale: 0.05,
+            // roughnessMap: woodRoughness,
+            roughness: 0.5,
+
+        });
+
+
+
+        var whiteTileMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x8f8f8f),
+            // map: woodColor,
+            // normalMap: woodNormal,
+            //displacementMap: woodDisplacement,
+            //displacementScale: 0.05,
+            // roughnessMap: woodRoughness,
+            roughness: 0.5,
+        });
+
+        var model_pawn = null;
+        var model_knight = null;
+        var model_rook = null;
+        var model_queen = null;
+        var model_king = null;
+        var model_bishop = null;
 
         /* StorePGN should write the proper pieces in the array board with the format of "BP0" for black pawn 0 */
         /* 
@@ -53,19 +104,19 @@
             0 for the ones on the left hand, 1 for the ones on  the right hand, 
         */
         let pieceMap = [
-          ["BR0", "BN0", "BB0", "BQ", "BK", "BB1", "BN1", "BR1"],
-          ["BP0", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"],
-          ["", "", "", "", "", "", "", ""],
-          ["", "", "", "", "", "", "", ""],
-          ["", "", "", "", "", "", "", ""],
-          ["", "", "", "", "", "", "", ""],
-          ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5", "WP6", "WP7"],
-          ["WR0", "WN0", "WB0", "WQ", "WK", "WB1", "WN1", "WR1"]
+            ["BR0", "BN0", "BB0", "BQ", "BK", "BB1", "BN1", "BR1"],
+            ["BP0", "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7"],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5", "WP6", "WP7"],
+            ["WR0", "WN0", "WB0", "WQ", "WK", "WB1", "WN1", "WR1"]
         ];
         const Board = {
             tilemap: [],
         };
-        
+
         board = Board;
         board.tilemap = new Array(8);
         for (let i = 0; i < 8; i++) {
@@ -161,19 +212,16 @@
                 this.pieces.push(value);
             }
         }
-        var scene, camera, renderer;
-        let loader = new THREE.STLLoader();
-        let material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
-        var board, game_group;
+
 
         //make the script wait until all the pieces are loaded before initializing the game and rendering
         loadModels().then(
-            function() {
+            function () {
                 init();
                 animate();
             }
         );
-        
+
         class ColorGUIHelper {
             constructor(object, prop) {
                 this.object = object;
@@ -188,124 +236,119 @@
         }
 
         //materials to be reused in the pieces
-        var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
-        var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
+
         //var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
         //var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
 
-       /*const waterColor = new THREE.TextureLoader().load('Textures/Water/Water_002_COLOR.jpg');
-       const waterNormal = new THREE.TextureLoader().load('Textures/Water/Water_002_NORM.jpg');
-       const waterDisplacement = new THREE.TextureLoader().load('Textures/Water/Water_002_DISP.jpg');
-       const waterRoughness = new THREE.TextureLoader().load('Textures/Water/Water_002_OCC.jpg');
-       const waterAmbient = new THREE.TextureLoader().load('Textures/Water/Water_002_ROUGH.jpg');
+        /*const waterColor = new THREE.TextureLoader().load('Textures/Water/Water_002_COLOR.jpg');
+        const waterNormal = new THREE.TextureLoader().load('Textures/Water/Water_002_NORM.jpg');
+        const waterDisplacement = new THREE.TextureLoader().load('Textures/Water/Water_002_DISP.jpg');
+        const waterRoughness = new THREE.TextureLoader().load('Textures/Water/Water_002_OCC.jpg');
+        const waterAmbient = new THREE.TextureLoader().load('Textures/Water/Water_002_ROUGH.jpg');
+ 
+         var blackTileMaterial = new THREE.MeshStandardMaterial({
+             color: new THREE.Color(0x303030),
+             map: waterColor,
+             normalMap: waterNormal,
+             displacementMap: waterDisplacement,
+             displacementScale: 0.05,
+             roughnessMap: waterRoughness,
+             roughness: 0.5,
+             aoMap: waterAmbient
+             
+         });
+ 
+         var whiteTileMaterial = new THREE.MeshStandardMaterial({
+             color: new THREE.Color(0x8f8f8f),
+             map: waterColor,
+             normalMap: waterNormal,
+             displacementMap: waterDisplacement,
+             displacementScale: 0.05,
+             roughnessMap: waterRoughness,
+             roughness: 0.5,
+             aoMap: waterAmbient  
+         });*/
 
+        //    const woodColor = new THREE.TextureLoader().load('Textures/Wood/basecolor.jpg');
+        //    const woodNormal = new THREE.TextureLoader().load('Textures/Wood/normal.jpg');
+        //    const woodRoughness = new THREE.TextureLoader().load('Textures/Wood/roughness.jpg');
+        //    const woodAmbient = new THREE.TextureLoader().load('Textures/Wood/occlusion.jpg');
+
+
+
+        function loadTextureSet(folder) {
+            let color = textureLoader.load(`Textures/${folder}/basecolor.jpg`);
+            color.wrapS = color.wrapT = THREE.RepeatWrapping;
+            pieceTextures[folder] = {};
+            pieceTextures[folder].color = color;
+            console.log(pieceTextures)
+
+            // let displacement = textureLoader.load(`Textures/${folder}/basecolor.jpg`);
+        }
+
+
+
+
+
+
+        /*const glassColor = new THREE.TextureLoader().load('Textures/Glass/glassBasecolor.jpg');
+        const glassDisplacement = new THREE.TextureLoader().load('Textures/Glass/glassHeight.jpg');
+        const glassNormal = new THREE.TextureLoader().load('Textures/Glass/glassNormal.jpg');
+        const glassRoughness = new THREE.TextureLoader().load('Textures/Glass/glassRoughness.jpg');
+        const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
+        const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
+ 
+         var blackTileMaterial = new THREE.MeshStandardMaterial({
+             color: new THREE.Color(0x303030),
+             map: glassColor,
+             normalMap: glassNormal,
+             displacementMap: glassDisplacement,
+             displacementScale: 0.05,
+             roughnessMap: glassRoughness,
+             roughness: 0.5,
+             
+         });
+ 
+         var whiteTileMaterial = new THREE.MeshStandardMaterial({
+             color: new THREE.Color(0x8f8f8f),
+             map: glassColor,
+             normalMap: glassNormal,
+             displacementMap: glassDisplacement,
+             displacementScale: 0.05,
+             roughnessMap: glassRoughness,
+             roughness: 0.5,  
+         });*/
+
+        /*const marbleColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
+        const marbleDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
+        const marbleNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
+        const marbleRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
+         
         var blackTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x303030),
-            map: waterColor,
-            normalMap: waterNormal,
-            displacementMap: waterDisplacement,
-            displacementScale: 0.05,
-            roughnessMap: waterRoughness,
-            roughness: 0.5,
-            aoMap: waterAmbient
-            
-        });
-
-        var whiteTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x8f8f8f),
-            map: waterColor,
-            normalMap: waterNormal,
-            displacementMap: waterDisplacement,
-            displacementScale: 0.05,
-            roughnessMap: waterRoughness,
-            roughness: 0.5,
-            aoMap: waterAmbient  
-        });*/
-
-       const woodColor = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_COLOR.png');
-       const woodNormal = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_NORM.png');
-       const woodRoughness = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_ROUGH.png');
-       const woodAmbient = new THREE.TextureLoader().load('Textures/Wood/Wood_009_Mahogany_OCC.png');
-
-        var blackTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x303030),
-            map: woodColor,
-            normalMap: woodNormal,
-            //displacementMap: woodDisplacement,
-            //displacementScale: 0.05,
-            roughnessMap: woodRoughness,
-            roughness: 0.5,
-            
-        });
-
-        var whiteTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x8f8f8f),
-            map: woodColor,
-            normalMap: woodNormal,
-            //displacementMap: woodDisplacement,
-            //displacementScale: 0.05,
-            roughnessMap: woodRoughness,
-            roughness: 0.5,  
-        });
-
-       /*const glassColor = new THREE.TextureLoader().load('Textures/Glass/glassBasecolor.jpg');
-       const glassDisplacement = new THREE.TextureLoader().load('Textures/Glass/glassHeight.jpg');
-       const glassNormal = new THREE.TextureLoader().load('Textures/Glass/glassNormal.jpg');
-       const glassRoughness = new THREE.TextureLoader().load('Textures/Glass/glassRoughness.jpg');
-       const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
-       const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
-
-        var blackTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x303030),
-            map: glassColor,
-            normalMap: glassNormal,
-            displacementMap: glassDisplacement,
-            displacementScale: 0.05,
-            roughnessMap: glassRoughness,
-            roughness: 0.5,
-            
-        });
-
-        var whiteTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x8f8f8f),
-            map: glassColor,
-            normalMap: glassNormal,
-            displacementMap: glassDisplacement,
-            displacementScale: 0.05,
-            roughnessMap: glassRoughness,
-            roughness: 0.5,  
-        });*/ 
-
-       /*const marbleColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
-       const marbleDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
-       const marbleNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
-       const marbleRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
-        
-       var blackTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x303030),
-            map: marbleColor,
-            normalMap: marbleNormal,
-            displacementMap: marbleDisplacement,
-            displacementScale: 0.0001,
-            roughnessMap:marbleRoughness,
-            roughness: 0.1,
-            
-        });
-
-        var whiteTileMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x8f8f8f),
-            map: marbleColor,
-            normalMap: marbleNormal,
-            displacementMap: marbleDisplacement,
-            displacementScale: 0.0001,
-            roughnessMap: marbleRoughness,
-            roughness: 0.1,  
-        }); */
+             color: new THREE.Color(0x303030),
+             map: marbleColor,
+             normalMap: marbleNormal,
+             displacementMap: marbleDisplacement,
+             displacementScale: 0.0001,
+             roughnessMap:marbleRoughness,
+             roughness: 0.1,
+             
+         });
+ 
+         var whiteTileMaterial = new THREE.MeshStandardMaterial({
+             color: new THREE.Color(0x8f8f8f),
+             map: marbleColor,
+             normalMap: marbleNormal,
+             displacementMap: marbleDisplacement,
+             displacementScale: 0.0001,
+             roughnessMap: marbleRoughness,
+             roughness: 0.1,  
+         }); */
 
         let skyboxGeo;
-        
+
         function init() {
-            
+
             // scene
             scene = new THREE.Scene();
 
@@ -313,19 +356,19 @@
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-            
+
             // camera
-            var ratio = window.innerWidth/window.innerHeight;
-            camera = new THREE.PerspectiveCamera(45,ratio,0.1,1000);
-            camera.position.set(3.5,10,3); //initial position of the camera
-            camera.lookAt(3.5,0,-3.5);
-            camera.lookAt(3.5,0,-3.5);
+            var ratio = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+            camera.position.set(3.5, 10, 3); //initial position of the camera
+            camera.lookAt(3.5, 0, -3.5);
+            camera.lookAt(3.5, 0, -3.5);
             camera.updateProjectionMatrix();
 
             // resize
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                camera.aspect = window.innerWidth/ window.innerHeight;
+                camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
             });
 
@@ -353,12 +396,12 @@
 
             // cloudy skybox
             var cloudyskybox = new THREE.CubeTextureLoader().load([
-            "Skybox/Cloudy/bluecloud_bk.jpg",
-            "Skybox/Cloudy/bluecloud_dn.jpg",
-            "Skybox/Cloudy/bluecloud_ft.jpg",
-            "Skybox/Cloudy/bluecloud_lf.jpg",
-            "Skybox/Cloudy/bluecloud_rt.jpg",
-            "Skybox/Cloudy/bluecloud_up.jpg"
+                "Skybox/Cloudy/bluecloud_bk.jpg",
+                "Skybox/Cloudy/bluecloud_dn.jpg",
+                "Skybox/Cloudy/bluecloud_ft.jpg",
+                "Skybox/Cloudy/bluecloud_lf.jpg",
+                "Skybox/Cloudy/bluecloud_rt.jpg",
+                "Skybox/Cloudy/bluecloud_up.jpg"
             ])
             scene.background = cloudyskybox;
 
@@ -390,8 +433,8 @@
             // gui
             const gui = new dat.GUI();
 
-            var parameters = { v: 0};
-            
+            var parameters = { v: 0 };
+
             // light intensity slider
             const folderlight = gui.addFolder("Light");
             folderlight.add(light, 'intensity', 0, 2, 0.1);
@@ -399,27 +442,46 @@
 
             // color slider
             const folderpieces = gui.addFolder("Pieces");
-            
+
             folderpieces.addColor(new ColorGUIHelper(whitePieceMaterial, 'color'), 'value').name('WhitePiece');
             folderpieces.addColor(new ColorGUIHelper(blackPieceMaterial, 'color'), 'value').name('BlackPiece');
 
             const folderboard = gui.addFolder("Board");
             folderboard.addColor(new ColorGUIHelper(blackTileMaterial, 'color'), 'value').name('BlackTile');
             folderboard.addColor(new ColorGUIHelper(whiteTileMaterial, 'color'), 'value').name('WhiteTile');
-            
-            
+
+
             const folderbackground = gui.addFolder("Background");
             var stringList = ["One", "Two", "Three"];
             folderbackground.add(parameters, 'v', stringList).name('Skyboxes');
 
             const folderTextures = gui.addFolder("Textures");
-            var stringLists = ["One", "Two", "Three"];
-            folderTextures.add(parameters, 'v', stringLists).name('Textures');
+
+            folderTextures.add(blackPieceMaterial, 'map', Object.keys(pieceTextures)).name('Black Piece').onChange((value) => {
+
+                blackPieceMaterial.map = pieceTextures[value].color;
+                blackPieceMaterial.needsUpdate = true;
+            });
+            folderTextures.add(whitePieceMaterial, 'map', Object.keys(pieceTextures)).name('White Piece').onChange((value) => {
+
+                whitePieceMaterial.map = pieceTextures[value].color;
+                whitePieceMaterial.needsUpdate = true;
+            });
+            folderTextures.add(blackTileMaterial, 'map', Object.keys(pieceTextures)).name('Black Square').onChange((value) => {
+
+                blackTileMaterial.map = pieceTextures[value].color;
+                blackTileMaterial.needsUpdate = true;
+            });
+            folderTextures.add(whiteTileMaterial, 'map', Object.keys(pieceTextures)).name('White Square').onChange((value) => {
+
+                whiteTileMaterial.map = pieceTextures[value].color;
+                whiteTileMaterial.needsUpdate = true;
+            });
 
 
             //controls
             // controls = new THREE.OrbitControls( camera, renderer.domElement );
-            
+
             //axes. uncomment below line to show axes
             // scene.add(new THREE.AxesHelper(20));
 
@@ -428,7 +490,7 @@
             // var mesh = new THREE.Mesh(geometry, material);
             // mesh.position.set(0,0,1);
             // scene.add(mesh);
-            
+
             let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
             let basicGame = "1. h4 e5 2. e4 Bc5 3. Nc3 Qxh4 4. Nf3 Qxf2# 0-1";
             let fullGame = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. g4 h6 5. g5 Rg8 6. gxh6 Rh8 7. hxg7 Be7 8. gxh8=Q+ Bf8 9. Qxf8+ Kxf8 10. Qxf7# 1-0";
@@ -442,15 +504,15 @@
             let BaiJinshiVsDingLiren2017 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Nf3 O-O 5. Bg5 c5 6. e3 cxd4 7. Qxd4 Nc6 8. Qd3 h6 9. Bh4 d5 10. Rd1 g5 11. Bg3 Ne4 12. Nd2 Nc5 13. Qc2 d4 14. Nf3 e5 15. Nxe5 dxc3 16. Rxd8 cxb2+ 17. Ke2 Rxd8 18. Qxb2 Na4 19. Qc2 Nc3+ 20. Kf3 Rd4 21. h3 h5 22. Bh2 g4+ 23. Kg3 Rd2 24. Qb3 Ne4+ 25. Kh4 Be7+ 26. Kxh5 Kg7 27. Bf4 Bf5 28. Bh6+ Kh7 29. Qxb7 Rxf2 30. Bg5 Rh8 31. Nxf7 Bg6+ 32. Kxg4 Ne5+ 0-1";
             let RotlewivsRubinstein1997 = "1. d4 d5 2. Nf3 e6 3. e3 c5 4. c4 Nc6 5. Nc3 Nf6 6. dxc5 Bxc5 7. a3 a6 8. b4 Bd6 9. Bb2 O-O 10. Qd2 Qe7 11. Bd3 dxc4 12. Bxc4 b5 13. Bd3 Rd8 14. Qe2 Bb7 15. O-O Ne5 16. Nxe5 Bxe5 17. f4 Bc7 18. e4 Rac8 19. e5 Bb6+ 20. Kh1 Ng4 21. Be4 Qh4 22. g3 Rxc3 23. gxh4 Rd2 24. Qxd2 Bxe4+ 25. Qg2 Rh3 0-1";
             let GellervsEuwe1953 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 c5 5. a3 Bxc3+ 6. bxc3 b6 7. Bd3 Bb7 8. f3 Nc6 9. Ne2 O-O 10. O-O Na5 11. e4 Ne8 12. Ng3 cxd4 13. cxd4 Rc8 14. f4 Nxc4 15. f5 f6 16. Rf4 b5 17. Rh4 Qb6 18. e5 Nxe5 19. fxe6 Nxd3 20. Qxd3 Qxe6 21. Qxh7+ Kf7 22. Bh6 Rh8 23. Qxh8 Rc2 24. Rc1 Rxg2+ 25. Kf1 Qb3 26. Ke1 Qf3 0-1";
-            
+
             pgn = StorePGN(string);
-            
+
             CreateBoard();
             StartGame(pgn);
         }
-        
+
         var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
-        var checkTileMaterial = new THREE.MeshBasicMaterial ({color: checkTileColour});
+        var checkTileMaterial = new THREE.MeshBasicMaterial({ color: checkTileColour });
 
         function CreateBoard() {
 
@@ -493,50 +555,73 @@
         }
 
         //variables to keep the models in memory
-        var model_pawn = null;
-        var model_knight = null;
-        var model_rook = null;
-        var model_queen = null;
-        var model_king = null;
-        var model_bishop = null;
 
-        function loadModels(){
-          // the loadObject function works asynchronously using callbacks,
-          // we use Promise.all to wait for all the models to load before continuing
-          return Promise.all(
-              [
-                loadObject("./models/model_pawn.stl"),
-                loadObject("./models/model_knight.stl"),
-                loadObject("./models/model_rook.stl"),
-                loadObject("./models/model_queen.stl"),
-                loadObject("./models/model_king.stl"),
-                loadObject("./models/model_bishop.stl")
-              ]
-          ).then(function(objects){
-              model_pawn = objects[0];
-              model_knight = objects[1];
-              model_rook = objects[2];
-              model_queen = objects[3];
-              model_king = objects[4];
-              model_bishop = objects[5];
-          })
+
+        function loadModels() {
+            // the loadObject function works asynchronously using callbacks,
+            // we use Promise.all to wait for all the models to load before continuing
+            //   return Promise.all(
+            //       [
+            //         loadObject("./models/model_pawn.glb"),
+            //         loadObject("./models/model_knight.glb"),
+            //         loadObject("./models/model_rook.glb"),
+            //         loadObject("./models/model_queen.glb"),
+            //         loadObject("./models/model_king.glb"),
+            //         loadObject("./models/model_bishop.glb")
+            //       ]
+            //   ).then(function(objects){
+            //       model_pawn = objects[0];
+            //       model_knight = objects[1];
+            //       model_rook = objects[2];
+            //       model_queen = objects[3];
+            //       model_king = objects[4];
+            //       model_bishop = objects[5];
+            //   })
+            return new Promise(
+                (ok, no) => {
+                    const loader = new THREE.GLTFLoader();
+                    loader.load("./models/chess_complete.glb",
+                        (gltf) => {
+                            console.log(gltf)
+                            model_board = gltf.scene.getObjectByName("BOARD");
+                            model_pawn = gltf.scene.getObjectByName("PAWN");
+                            model_knight = gltf.scene.getObjectByName("KNIGHT");
+                            model_rook = gltf.scene.getObjectByName("ROOK");
+                            model_queen = gltf.scene.getObjectByName("QUEEN");
+                            model_king = gltf.scene.getObjectByName("KING");
+                            model_bishop = gltf.scene.getObjectByName("BISHOP");
+                            console.log(model_pawn);
+
+
+                            ok()
+                        }
+                    );
+                    loadTextureSet("Water");
+                    loadTextureSet("Glass");
+                    loadTextureSet("Marble");
+                    loadTextureSet("Wood");
+                }
+
+            );
+
         }
-        
-        function loadObject(path) {
-          // create a new promise that will resolve when the file is completely loaded
-          return new Promise(function(resolve,reject){
-            loader.load(path, function (geometry) {
-              resolve(new THREE.Mesh(geometry, material)); // create a 3d object from the file, and using a placeholder material
-             })
-          });
-        }
+
+        // function loadObject(path) {
+        //   // create a new promise that will resolve when the file is completely loaded
+        //   return new Promise(function(resolve,reject){
+        //     loader.load(path, function (scene) {
+        //         console.log(scene)
+        //       resolve(new THREE.Mesh(geometry, material)); // create a 3d object from the file, and using a placeholder material
+        //      })
+        //   });
+        // }
 
         function RankToPos(rank) {
             return --rank;
         }
 
         function FileToPos(file) {
-            let files = ['a','b','c','d','e','f','g','h'];
+            let files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             return files.indexOf(file);
         }
 
@@ -547,7 +632,7 @@
         function PosToFile(pos) {
             if (pos > 7) pos = 7;
             else if (pos < 0) pos = 0;
-            var files = ['a','b','c','d','e','f','g','h'];
+            var files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             return files[pos];
         }
 
@@ -575,37 +660,37 @@
         }
 
         function CreatePiece(color, model, name, row, column) {
-          // creates a piece cloning the model and set to a position in row, column
-          var pieces;
-          if (color === 'W') {
-            pieces = white_pieces; // set to the list of white's pieces
-            pieces[name] = model.clone(); 
-            pieces[name].material = whitePieceMaterial; 
-            pieces[name].position.set(row, 0, -column); // assign the position 
-            game_group.add(pieces[name]);
-        } else if (color === 'B') {
-            pieces = black_pieces; // set to the list of black's pieces
-            pieces[name] = model.clone(); 
-            pieces[name].material = blackPieceMaterial; 
-            pieces[name].position.set(row, 0, -column); 
-            pieces[name].rotation.y = Math.PI; // rotate facing towards whites
-            game_group.add(pieces[name]);
-          }
-          return pieces[name];
+            // creates a piece cloning the model and set to a position in row, column
+            var pieces;
+            if (color === 'W') {
+                pieces = white_pieces; // set to the list of white's pieces
+                pieces[name] = model.clone();
+                pieces[name].material = whitePieceMaterial;
+                pieces[name].position.set(row, 0, -column); // assign the position 
+                game_group.add(pieces[name]);
+            } else if (color === 'B') {
+                pieces = black_pieces; // set to the list of black's pieces
+                pieces[name] = model.clone();
+                pieces[name].material = blackPieceMaterial;
+                pieces[name].position.set(row, 0, -column);
+                pieces[name].rotation.y = Math.PI; // rotate facing towards whites
+                game_group.add(pieces[name]);
+            }
+            return pieces[name];
         }
 
         function PlacePieces() {
-          // two-loop for assigning each piece in the board
+            // two-loop for assigning each piece in the board
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
-                    let name = pieceMap[7-i][j]; //  get the piece position from the corresponding cell in the board 2d array
+                    let name = pieceMap[7 - i][j]; //  get the piece position from the corresponding cell in the board 2d array
                     if (name === "") {
                         continue;
                     }
                     let color = name.charAt(0); // get the color, W or B
                     let piece = name.charAt(1); // get the piece type, P, K, H, T, Q, R
                     let number = name.charAt(2); // get the corresponding identifier number
-                    
+
                     let tile = board.tilemap[j][i];
                     var newPiece;
                     switch (piece) {
@@ -635,16 +720,16 @@
 
         async function StartGame(pgnArray) {
             let colour = 'W';
-            for (var i = 0; i < pgnArray.length-1; i++) {
+            for (var i = 0; i < pgnArray.length - 1; i++) {
                 // ignore the 1., 2. elements
-                if (i % 3 == 0|| i == 0) continue;
+                if (i % 3 == 0 || i == 0) continue;
 
                 await waitingSpaceKeypress();
-                
+
                 DoCommand(pgnArray[i], colour);
-                colour = (colour === 'W') ? 'B': 'W';
+                colour = (colour === 'W') ? 'B' : 'W';
             }
-            TriggerWin(pgnArray[pgnArray.length-1]);
+            TriggerWin(pgnArray[pgnArray.length - 1]);
         }
         function waitingSpaceKeypress() {
             return new Promise((resolve) => {
@@ -673,7 +758,7 @@
                 textBox.innerHTML = "Checkmate: Black wins";
             }
         }
-        
+
         var skipTestCheck = true;
         function DoCommand(command, colour) {
             if (skipTestCheck == false) {
@@ -705,7 +790,7 @@
                 // Return
                 return;
             }
-            
+
             if (command.includes("O-O-O")) {
                 // Handle Castle Queen
                 DoCastleQueen(colour);
@@ -729,7 +814,7 @@
                 // Return
                 return;
             }
-            
+
             if (command.includes('x')) {
                 // Handle Takes
                 // Remove Piece at pos of last 2 char
@@ -814,7 +899,7 @@
                 MovePiece(rookPiece, 'd', 8);
             }
         }
-        
+
         function DoCastleKing(colour) {
             var kingPiece;
             var rookPiece;
@@ -859,7 +944,7 @@
             // return;
             // Remove piece at takenTile
             // Move it to TakenPieces of same colour
-            takenTile.getPiece().getMesh().position.set(3.5,-2,-3.5);
+            takenTile.getPiece().getMesh().position.set(3.5, -2, -3.5);
             scene.remove(takenTile.getPiece().getMesh());
             takenTile.setPiece(undefined);
         }
@@ -931,7 +1016,7 @@
                 var rank = command.charAt(2);
                 target = FindTile(file, rank).getPiece();
             }
-            
+
             MovePiece(target, endFile, endRank);
         }
 
@@ -970,43 +1055,43 @@
                     if (!pieceToReturn && endRank != 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endFile != 'a' && endRank != 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endFile != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult);
-                    if (!pieceToReturn && endFile != 'a' && endRank != 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult);    
+                    if (!pieceToReturn && endFile != 'a' && endRank != 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult);
                     break;
                 // look for queen
                 case 'Q':
                     // from tile, look N,NE,E,SE,S,SW,W,NW until found
                     while (!pieceToReturn) {
 
-                        if (!stopN && !pieceToReturn && (endRank + mult-1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopN = true;}
+                        if (!stopN && !pieceToReturn && (endRank + mult - 1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopN = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNE = true;}
+                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h' && (endRank + mult - 1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopNE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopE = true;}
+                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank - mult+1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSE = true;}
+                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h' && (endRank - mult + 1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopSE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopS && !pieceToReturn && (endRank - mult+1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopS = true;}
+                        if (!stopS && !pieceToReturn && (endRank - mult + 1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopS = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank - mult+1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSW = true;}
+                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a' && (endRank - mult + 1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopSW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopW = true;}
+                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank + mult-1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNW = true;}
+                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a' && (endRank + mult - 1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopNW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
                         if (mult > 7) break;
@@ -1017,21 +1102,21 @@
                 // look for rook
                 case 'R':
                     // from tile, look N,E,S,W until found
-                    while (!pieceToReturn ) {
-                        if (!stopN && !pieceToReturn && (endRank + mult-1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopN = true;}
+                    while (!pieceToReturn) {
+                        if (!stopN && !pieceToReturn && (endRank + mult - 1) < 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopN = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopE = true;}
+                        if (!stopE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopS && !pieceToReturn && (endRank - mult+1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopS = true;}
+                        if (!stopS && !pieceToReturn && (endRank - mult + 1) > 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopS = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopW = true;}
+                        if (!stopW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a') pieceToReturn = SearchW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
                         mult++;
@@ -1042,20 +1127,20 @@
                 case 'B':
                     // from tile, look NE,SE,SW,NW
                     while (!pieceToReturn) {
-                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank + mult-1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNE = true;}
+                        if (!stopNE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h' && (endRank + mult - 1) < 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopNE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult-1) != 'h' && (endRank - mult+1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSE = true;}
+                        if (!stopSE && !pieceToReturn && PosToFile(FileToPos(endFile) + mult - 1) != 'h' && (endRank - mult + 1) > 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopSE = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank - mult+1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopSW = true;}
+                        if (!stopSW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a' && (endRank - mult + 1) > 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopSW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
-                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult+1) != 'a' && (endRank + mult-1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
-                        if (pieceToReturn == true) {pieceToReturn = undefined; stopNW = true;}
+                        if (!stopNW && !pieceToReturn && PosToFile(FileToPos(endFile) - mult + 1) != 'a' && (endRank + mult - 1) < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult, true);
+                        if (pieceToReturn == true) { pieceToReturn = undefined; stopNW = true; }
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
 
                         mult++;
@@ -1067,7 +1152,7 @@
                     // from tile, look in L
                     if (endFile != 'g' && endFile != 'h' && endRank < 8) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, 1);
                     if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
-                    if (!pieceToReturn && endFile != 'a' && endFile != 'b' && endRank > 1) pieceToReturn = SearchKnight1(type,colour, endFile, endRank, -1);
+                    if (!pieceToReturn && endFile != 'a' && endFile != 'b' && endRank > 1) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, -1);
                     if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
                     if (!pieceToReturn && endFile != 'h' && endRank < 7) pieceToReturn = SearchKnight1(type, colour, endFile, endRank, 2);
                     if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
@@ -1098,9 +1183,9 @@
                         if (!pieceToReturn && endFile != 'a' && endRank < 8) pieceToReturn = SearchNW(type, colour, endFile, endRank, mult);
                         if (!CheckDisambiguator(pieceToReturn, disambiguator)) pieceToReturn = undefined;
                     }
-                    
+
                     break;
-                }
+            }
 
             return pieceToReturn;
         }
@@ -1108,65 +1193,65 @@
         function SearchTile(type, colour, file, rank, fileOffset, rankOffset) {
             let newFile = PosToFile(FileToPos(file) + fileOffset);
             let newRank = rank + rankOffset;
-            
+
             return FindTile(newFile, newRank).getPiece();
         }
 
         function SearchN(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 0*mult, 1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 0 * mult, 1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchNE(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, 1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1 * mult, 1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchE(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, 0*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1 * mult, 0 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchSE(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 1*mult, -1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 1 * mult, -1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchS(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 0*mult, -1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 0 * mult, -1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchSW(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, -1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1 * mult, -1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchW(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, 0*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1 * mult, 0 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchNW(type, colour, endFile, endRank, mult, looped) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, -1*mult, 1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -1 * mult, 1 * mult);
             if (looped) return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : true;
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchKnight1(type, colour, endFile, endRank, mult) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, 2/mult, 1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, 2 / mult, 1 * mult);
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
         function SearchKnight2(type, colour, endFile, endRank, mult) {
-            let tempPiece = SearchTile(type, colour, endFile, endRank, -2/mult, 1*mult);
+            let tempPiece = SearchTile(type, colour, endFile, endRank, -2 / mult, 1 * mult);
             return (!tempPiece || tempPiece.getType() === type && tempPiece.getColour() === colour) ? tempPiece : undefined;
         }
 
@@ -1194,4 +1279,5 @@
         }
     </script>
 </body>
+
 </html>
