@@ -43,10 +43,45 @@
     <button id="info" onclick="PlaySound()">Click Me</button>
     <div><button id="info" onclick="">Play</button></div>
 
+    <link rel="stylesheet" href="style.css">
+    <div class="dropdown">
+        <button onclick="myFunction()" class="dropbtn">Games</button>
+        <div id="myDropdown" class="dropdown-content">
+          <a href="#"> Kasparov Vs Topalov (1999) </a>
+          <a href="#"> Morphy Vs Allies (1858) </a>
+          <a href="#"> Aronian Vs Anand (2013) </a>
+          <a href="#"> Karpov Vs Kasparov (1985) </a>
+          <a href="#"> Byrne Vs Fischer (1956) </a>
+          <a href="#"> Ivanchuk Vs Yusupov (1991) </a>
+          <a href="#"> Short Vs Tmman (1991) </a>
+          <a href="#"> BaiJinshi Vs DingLiren (2017) </a>
+          <a href="#"> Rotlewi Vs Rubinstein (1997) </a>
+          <a href="#"> Geller Vs Euwe (1953) </a>
+        </div>
+    </div>
+
+    
     <div id="TextBox" style="visibility:hidden"></div>
 
     <script>
 
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+        for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+         }
+        }   
+        }
+    }
         //holds the pieces of each player, whites and blacks
         var black_pieces = {};
         var white_pieces = {};
