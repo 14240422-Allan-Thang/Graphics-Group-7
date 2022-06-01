@@ -13,6 +13,61 @@
         width: 100%;
         height: 100%
     }
+
+    .dropbtn {
+        background-color: #3498DB;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        position:absolute;
+        z-index:5;
+    }
+
+  /* Dropdown button on hover & focus */
+    .dropbtn:hover, .dropbtn:focus {
+        background-color: #2980B9;
+    }
+  
+  /* The container <div> - needed to position the dropdown content */
+    .dropdown {
+        position:relative;
+        display: inline-block;
+    }
+  
+  /* Dropdown Content (Hidden by Default) */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+  
+  /* Links inside the dropdown */
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        
+    }
+  
+  /* Change color of dropdown links on hover */
+    .dropdown-content a:hover {background-color: #ddd}
+  
+  /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+    .show {display:block;}
+
+    .button-corner {
+        position: fixed;
+        bottom: 50px;
+        right: 150px;
+        padding: 50px 50px;
+     
+    }
 </style>
 
 <body>
@@ -40,12 +95,9 @@
         }
     </style>
 
-    <button id="info" onclick="PlaySound()">Click Me</button>
-    <div><button id="info" onclick="">Play</button></div>
-
-    <link rel="stylesheet" href="style.css">
-    <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">Games</button>
+    <div id="TextBox" style="visibility:hidden"></div>
+    <div class="dropAdown">
+        <button onclick="dropdownFunction()" class="dropbtn">Games</button>
         <div id="myDropdown" class="dropdown-content">
           <a href="#"> Kasparov Vs Topalov (1999) </a>
           <a href="#"> Morphy Vs Allies (1858) </a>
@@ -59,29 +111,30 @@
           <a href="#"> Geller Vs Euwe (1953) </a>
         </div>
     </div>
-
     
-    <div id="TextBox" style="visibility:hidden"></div>
+    <div class = "button-corner">
+        <button id="info" > Reset </button>
+    </div>    
 
     <script>
 
-    function myFunction() {
-        document.getElementById("myDropdown").classList.toggle("show");
-    }
-
-    // Close the dropdown menu if the user clicks outside of it
-    window.onclick = function(event) {
-        if (!event.target.matches('.dropbtn')) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
-            var i;
-        for (i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-        if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-         }
-        }   
+        function dropdownFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
         }
-    }
+        // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+            if  (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+                    }
+                }   
+            }
+        }
+
         //holds the pieces of each player, whites and blacks
         var black_pieces = {};
         var white_pieces = {};
@@ -111,7 +164,6 @@
             roughness: 0.5,
 
         });
-
 
 
         var whiteTileMaterial = new THREE.MeshStandardMaterial({
