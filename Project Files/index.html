@@ -92,7 +92,7 @@
     }
 
     .container{
-        visibility: hidden;
+        visibility: visible;
         padding: 0px 0px;
         position: absolute;
         width: 100%;
@@ -133,28 +133,38 @@
         }
     </style>
 
-    <div class = "container">
+    <div id = "menu" class = "container">
+
         <div class = "title-header">
             <h1> Games </h1>  
         </div>
 
         <div class = "play-class">
-            <button id="game1" class = "game-button" onclick = "hello('pgn')"> Kasparov Vs Topalov (1999) </button>
-            <button id="game2" class = "game-button" onclick = "hello('bye')" > Morphy Vs Allies (1858) </button>
-            <button id="game3" class = "game-button" > Aronian Vs Anand (2013) </button>
-            <button id="game4" class = "game-button" > Karpov Vs Kasparov (1985) </button>
-            <button id="game5" class = "game-button" > Byrne Vs Fischer (1956) </button>
-            <button id="game6" class = "game-button" > Ivanchuk Vs Yusupov (1991) </button>
-            <button id="game7" class = "game-button" > Short Vs Tmman (1991) </button>
-            <button id="game8" class = "game-button" > Ivanchuk Vs Yusupov (1991) </button>
-            <button id="game9" class = "game-button" > BaiJinshi Vs DingLiren (2017) </button>
-            <button id="game10" class = "game-button" > Rotlewi Vs Rubinstein (1997) </button>
-            <button id="game11" class = "game-button" > Geller Vs Euwe (1953) </button>    
+            <button id="game1" class = "game-button" onclick = "button1()" > Kasparov Vs Topalov (1999) </button>
+            <button id="game2" class = "game-button" onclick = "button2()" > Morphy Vs Allies (1858) </button>
+            <button id="game3" class = "game-button" onclick = "button3()"> Aronian Vs Anand (2013) </button>
+            <button id="game4" class = "game-button" onclick = "button4()"> Karpov Vs Kasparov (1985) </button>
+            <button id="game5" class = "game-button" onclick = "button5()"> Byrne Vs Fischer (1956) </button>
+            <button id="game6" class = "game-button" onclick = "button6()"> Ivanchuk Vs Yusupov (1991) </button>
+            <button id="game7" class = "game-button" onclick = "button7()"> Short Vs Tmman (1991) </button>
+            <button id="game8" class = "game-button" onclick = "button8()"> BaiJinshi Vs DingLiren (2017) </button>
+            <button id="game9" class = "game-button" onclick = "button9()"> Rotlewi Vs Rubinstein (1997) </button>
+            <button id="game10" class = "game-button" onclick = "button10()"> Geller Vs Euwe (1953) </button>    
         </div>
     </div>
     
+    <div id="TextBox" style="visibility:hidden"></div>
+
+    <div class = "button-corner">
+        <button id="reset_button" onclick= "resetBtn()"> Reset </button>
+    </div>
 
     <script>
+        
+        //reload the page
+        function resetBtn(){
+            location.reload();
+        }
 
         //list of games
         let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
@@ -170,9 +180,6 @@
         let BaiJinshiVsDingLiren2017 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Nf3 O-O 5. Bg5 c5 6. e3 cxd4 7. Qxd4 Nc6 8. Qd3 h6 9. Bh4 d5 10. Rd1 g5 11. Bg3 Ne4 12. Nd2 Nc5 13. Qc2 d4 14. Nf3 e5 15. Nxe5 dxc3 16. Rxd8 cxb2+ 17. Ke2 Rxd8 18. Qxb2 Na4 19. Qc2 Nc3+ 20. Kf3 Rd4 21. h3 h5 22. Bh2 g4+ 23. Kg3 Rd2 24. Qb3 Ne4+ 25. Kh4 Be7+ 26. Kxh5 Kg7 27. Bf4 Bf5 28. Bh6+ Kh7 29. Qxb7 Rxf2 30. Bg5 Rh8 31. Nxf7 Bg6+ 32. Kxg4 Ne5+ 0-1";
         let RotlewivsRubinstein1997 = "1. d4 d5 2. Nf3 e6 3. e3 c5 4. c4 Nc6 5. Nc3 Nf6 6. dxc5 Bxc5 7. a3 a6 8. b4 Bd6 9. Bb2 O-O 10. Qd2 Qe7 11. Bd3 dxc4 12. Bxc4 b5 13. Bd3 Rd8 14. Qe2 Bb7 15. O-O Ne5 16. Nxe5 Bxe5 17. f4 Bc7 18. e4 Rac8 19. e5 Bb6+ 20. Kh1 Ng4 21. Be4 Qh4 22. g3 Rxc3 23. gxh4 Rd2 24. Qxd2 Bxe4+ 25. Qg2 Rh3 0-1";
         let GellervsEuwe1953 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 c5 5. a3 Bxc3+ 6. bxc3 b6 7. Bd3 Bb7 8. f3 Nc6 9. Ne2 O-O 10. O-O Na5 11. e4 Ne8 12. Ng3 cxd4 13. cxd4 Rc8 14. f4 Nxc4 15. f5 f6 16. Rf4 b5 17. Rh4 Qb6 18. e5 Nxe5 19. fxe6 Nxd3 20. Qxd3 Qxe6 21. Qxh7+ Kf7 22. Bh6 Rh8 23. Qxh8 Rc2 24. Rc1 Rxg2+ 25. Kf1 Qb3 26. Ke1 Qf3 0-1";
-
-    
-
 
         //holds the pieces of each player, whites and blacks
         var black_pieces = {};
@@ -484,7 +491,7 @@
             // mesh.position.set(0,0,1);
             // scene.add(mesh);
 
-            let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
+            /*let string = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0";
             let basicGame = "1. h4 e5 2. e4 Bc5 3. Nc3 Qxh4 4. Nf3 Qxf2# 0-1";
             let fullGame = "1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. g4 h6 5. g5 Rg8 6. gxh6 Rh8 7. hxg7 Be7 8. gxh8=Q+ Bf8 9. Qxf8+ Kxf8 10. Qxf7# 1-0";
             let KasparovVsTopalov1999 = "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Be3 Bg7 5. Qd2 c6 6. f3 b5 7. Nge2 Nbd7 8. Bh6 Bxh6 9. Qxh6 Bb7 10. a3 e5 11. O-O-O Qe7 12. Kb1 a6 13. Nc1 O-O-O 14. Nb3 exd4 15. Rxd4 c5 16. Rd1 Nb6 17. g3 Kb8 18. Na5 Ba8 19. Bh3 d5 20. Qf4+ Ka7 21. Rhe1 d4 22. Nd5 Nbxd5 23. exd5 Qd6 24. Rxd4 cxd4 25. Re7+ Kb6 26. Qxd4+ Kxa5 27. b4+ Ka4 28. Qc3 Qxd5 29. Ra7 Bb7 30. Rxb7 Qc4 31. Qxf6 Kxa3 32. Qxa6+ Kxb4 33. c3+ Kxc3 34. Qa1+ Kd2 35. Qb2+ Kd1 36. Bf1 Rd2 37. Rd7 Rxd7 38. Bxc4 bxc4 39. Qxh8 Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
@@ -497,12 +504,11 @@
             let BaiJinshiVsDingLiren2017 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Nf3 O-O 5. Bg5 c5 6. e3 cxd4 7. Qxd4 Nc6 8. Qd3 h6 9. Bh4 d5 10. Rd1 g5 11. Bg3 Ne4 12. Nd2 Nc5 13. Qc2 d4 14. Nf3 e5 15. Nxe5 dxc3 16. Rxd8 cxb2+ 17. Ke2 Rxd8 18. Qxb2 Na4 19. Qc2 Nc3+ 20. Kf3 Rd4 21. h3 h5 22. Bh2 g4+ 23. Kg3 Rd2 24. Qb3 Ne4+ 25. Kh4 Be7+ 26. Kxh5 Kg7 27. Bf4 Bf5 28. Bh6+ Kh7 29. Qxb7 Rxf2 30. Bg5 Rh8 31. Nxf7 Bg6+ 32. Kxg4 Ne5+ 0-1";
             let RotlewivsRubinstein1997 = "1. d4 d5 2. Nf3 e6 3. e3 c5 4. c4 Nc6 5. Nc3 Nf6 6. dxc5 Bxc5 7. a3 a6 8. b4 Bd6 9. Bb2 O-O 10. Qd2 Qe7 11. Bd3 dxc4 12. Bxc4 b5 13. Bd3 Rd8 14. Qe2 Bb7 15. O-O Ne5 16. Nxe5 Bxe5 17. f4 Bc7 18. e4 Rac8 19. e5 Bb6+ 20. Kh1 Ng4 21. Be4 Qh4 22. g3 Rxc3 23. gxh4 Rd2 24. Qxd2 Bxe4+ 25. Qg2 Rh3 0-1";
             let GellervsEuwe1953 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 c5 5. a3 Bxc3+ 6. bxc3 b6 7. Bd3 Bb7 8. f3 Nc6 9. Ne2 O-O 10. O-O Na5 11. e4 Ne8 12. Ng3 cxd4 13. cxd4 Rc8 14. f4 Nxc4 15. f5 f6 16. Rf4 b5 17. Rh4 Qb6 18. e5 Nxe5 19. fxe6 Nxd3 20. Qxd3 Qxe6 21. Qxh7+ Kf7 22. Bh6 Rh8 23. Qxh8 Rc2 24. Rc1 Rxg2+ 25. Kf1 Qb3 26. Ke1 Qf3 0-1";
+            */
 
-
-            pgn = StorePGN(string);
-
+            //pgn = StorePGN(string);
             CreateBoard();
-            StartGame(pgn);
+            //StartGame(pgn);
         }
 
         var tileGeometry = new THREE.BoxGeometry(1, 0.1, 1);
