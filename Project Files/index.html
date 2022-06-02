@@ -1,6 +1,7 @@
 <html>
 <head>
     <title>Chess Project</title>
+    <link rel="stylesheet" href="checkmate.css">
 </head>
 
 <style>
@@ -34,7 +35,7 @@
 
     <!-- <button id="SoundButton" onclick="PlaySound()">Click Me</button> -->
 
-    <div id="TextBox" style="visibility:hidden"></div>
+    <p id="TextBox"></p>
 
     <script>
         
@@ -159,12 +160,53 @@
             }
             addPiece(value) {
                 this.pieces.push(value);
+                if (this.colour === 'W') {
+                    for (let i = 0; i < this.pieces.length; i++) {
+                        switch (true) {
+                            case i <= 3:
+                                this.pieces[i].getMesh().position.set(8+i, 0, 0);
+                                break;
+                            case i <= 7:
+                                this.pieces[i].getMesh().position.set(4+i, 0, -1);
+                                console.log("<=7");
+                                break;
+                            case i <= 11:
+                                this.pieces[i].getMesh().position.set(0+i, 0, -2);
+                                console.log("<=11");
+                                break;
+                            default:
+                                this.pieces[i].getMesh().position.set(-4+i, 0, -3);
+                                console.log("default");
+                                break;
+                        }
+                    }
+                }
+                else {
+                    for (let i = 0; i < this.pieces.length; i++) {
+                        switch (true) {
+                            case i <= 3:
+                                this.pieces[i].getMesh().position.set(-1-i, 0, -7);
+                                break;
+                            case i <= 7:
+                                this.pieces[i].getMesh().position.set(3-i, 0, -6);
+                                break;
+                            case i <= 11:
+                                this.pieces[i].getMesh().position.set(7-i, 0, -5);
+                                break;
+                            default:
+                                this.pieces[i].getMesh().position.set(11-i, 0, -4);
+                                break;
+                        }
+                    }
+                }
             }
         }
         var scene, camera, renderer;
         let loader = new THREE.STLLoader();
         let material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
         var board, game_group;
+        var whiteTakenPieces = new TakenPieces('W');
+        var blackTakenPieces = new TakenPieces('B');
 
         //make the script wait until all the pieces are loaded before initializing the game and rendering
         loadModels().then(
@@ -443,7 +485,7 @@
             let RotlewivsRubinstein1997 = "1. d4 d5 2. Nf3 e6 3. e3 c5 4. c4 Nc6 5. Nc3 Nf6 6. dxc5 Bxc5 7. a3 a6 8. b4 Bd6 9. Bb2 O-O 10. Qd2 Qe7 11. Bd3 dxc4 12. Bxc4 b5 13. Bd3 Rd8 14. Qe2 Bb7 15. O-O Ne5 16. Nxe5 Bxe5 17. f4 Bc7 18. e4 Rac8 19. e5 Bb6+ 20. Kh1 Ng4 21. Be4 Qh4 22. g3 Rxc3 23. gxh4 Rd2 24. Qxd2 Bxe4+ 25. Qg2 Rh3 0-1";
             let GellervsEuwe1953 = "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 c5 5. a3 Bxc3+ 6. bxc3 b6 7. Bd3 Bb7 8. f3 Nc6 9. Ne2 O-O 10. O-O Na5 11. e4 Ne8 12. Ng3 cxd4 13. cxd4 Rc8 14. f4 Nxc4 15. f5 f6 16. Rf4 b5 17. Rh4 Qb6 18. e5 Nxe5 19. fxe6 Nxd3 20. Qxd3 Qxe6 21. Qxh7+ Kf7 22. Bh6 Rh8 23. Qxh8 Rc2 24. Rc1 Rxg2+ 25. Kf1 Qb3 26. Ke1 Qf3 0-1";
             
-            pgn = StorePGN(string);
+            pgn = StorePGN(basicGame);
             
             CreateBoard();
             StartGame(pgn);
@@ -662,12 +704,8 @@
         function TriggerWin(winner) {
             let textBox = document.getElementById("TextBox");
             textBox.style.visibility = "visible";
-            textBox.style.position = "fixed";
-            textBox.style.left = "20%";
-            textBox.style.top = "50%";
             if (winner === "1-0") {
                 textBox.innerHTML = "Checkmate: White wins";
-                textBox.style.color = 0x000000;
             }
             else {
                 textBox.innerHTML = "Checkmate: Black wins";
@@ -733,8 +771,8 @@
             if (command.includes('x')) {
                 // Handle Takes
                 // Remove Piece at pos of last 2 char
-                let takenTile = FindTile(command.charAt(command.length - 2), command.charAt(command.length - 1));
-                DoTakePiece(colour, takenTile);
+                let takenPiece = FindTile(command.charAt(command.length - 2), command.charAt(command.length - 1)).getPiece();
+                DoTakePiece(takenPiece);
                 // Remove 'x'
                 command = command.replace('x', '');
                 // Call CheckCommand again
@@ -854,14 +892,18 @@
             AddPiece(newPieceType, rank, file);
         }
 
-        function DoTakePiece(colour, takenTile) {
-            // REMOVE THIS WHEN DONE
-            // return;
+        function DoTakePiece(takenPiece) {
             // Remove piece at takenTile
             // Move it to TakenPieces of same colour
-            takenTile.getPiece().getMesh().position.set(3.5,-2,-3.5);
-            scene.remove(takenTile.getPiece().getMesh());
-            takenTile.setPiece(undefined);
+            // takenTile.getPiece().getMesh().position.set(3.5,-2,-3.5);
+            // scene.remove(takenTile.getPiece().getMesh());
+            if (takenPiece.colour === 'W') {
+                whiteTakenPieces.addPiece(takenPiece);
+            }
+            else {
+                blackTakenPieces.addPiece(takenPiece);
+            }
+            // takenTile.setPiece(undefined);
         }
 
         function DoBasicCommand(command, colour) {
