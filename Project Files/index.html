@@ -68,12 +68,7 @@
 
         var blackTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x303030),
-            // map: pieceTextures["Wood"].color,
-            // normalMap: woodNormal,
-            //displacementMap: woodDisplacement,
-            //displacementScale: 0.05,
-            // roughnessMap: woodRoughness,
-            roughness: 0.5,
+           
 
         });
 
@@ -81,12 +76,7 @@
 
         var whiteTileMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x8f8f8f),
-            // map: woodColor,
-            // normalMap: woodNormal,
-            //displacementMap: woodDisplacement,
-            //displacementScale: 0.05,
-            // roughnessMap: woodRoughness,
-            roughness: 0.5,
+            
         });
 
         var model_pawn = null;
@@ -235,47 +225,6 @@
             }
         }
 
-        //materials to be reused in the pieces
-
-        //var blackTileMaterial = new THREE.MeshBasicMaterial ({color: blackTileColour});
-        //var whiteTileMaterial = new THREE.MeshBasicMaterial ({color: whiteTileColour});
-
-        /*const waterColor = new THREE.TextureLoader().load('Textures/Water/Water_002_COLOR.jpg');
-        const waterNormal = new THREE.TextureLoader().load('Textures/Water/Water_002_NORM.jpg');
-        const waterDisplacement = new THREE.TextureLoader().load('Textures/Water/Water_002_DISP.jpg');
-        const waterRoughness = new THREE.TextureLoader().load('Textures/Water/Water_002_OCC.jpg');
-        const waterAmbient = new THREE.TextureLoader().load('Textures/Water/Water_002_ROUGH.jpg');
- 
-         var blackTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x303030),
-             map: waterColor,
-             normalMap: waterNormal,
-             displacementMap: waterDisplacement,
-             displacementScale: 0.05,
-             roughnessMap: waterRoughness,
-             roughness: 0.5,
-             aoMap: waterAmbient
-             
-         });
- 
-         var whiteTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x8f8f8f),
-             map: waterColor,
-             normalMap: waterNormal,
-             displacementMap: waterDisplacement,
-             displacementScale: 0.05,
-             roughnessMap: waterRoughness,
-             roughness: 0.5,
-             aoMap: waterAmbient  
-         });*/
-
-        //    const woodColor = new THREE.TextureLoader().load('Textures/Wood/basecolor.jpg');
-        //    const woodNormal = new THREE.TextureLoader().load('Textures/Wood/normal.jpg');
-        //    const woodRoughness = new THREE.TextureLoader().load('Textures/Wood/roughness.jpg');
-        //    const woodAmbient = new THREE.TextureLoader().load('Textures/Wood/occlusion.jpg');
-
-
-
         function loadTextureSet(folder) {
             let color = textureLoader.load(`Textures/${folder}/basecolor.jpg`);
             color.wrapS = color.wrapT = THREE.RepeatWrapping;
@@ -286,64 +235,6 @@
             
         }
 
-
-
-
-
-
-        /*const glassColor = new THREE.TextureLoader().load('Textures/Glass/glassBasecolor.jpg');
-        const glassDisplacement = new THREE.TextureLoader().load('Textures/Glass/glassHeight.jpg');
-        const glassNormal = new THREE.TextureLoader().load('Textures/Glass/glassNormal.jpg');
-        const glassRoughness = new THREE.TextureLoader().load('Textures/Glass/glassRoughness.jpg');
-        const glassAmbient = new THREE.TextureLoader().load('Textures/Glass/glassAmbientOcclusion.jpg');
-        const glassMetallic = new THREE.TextureLoader().load('Textures/Glass/glassMetallic.jpg');
- 
-         var blackTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x303030),
-             map: glassColor,
-             normalMap: glassNormal,
-             displacementMap: glassDisplacement,
-             displacementScale: 0.05,
-             roughnessMap: glassRoughness,
-             roughness: 0.5,
-             
-         });
- 
-         var whiteTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x8f8f8f),
-             map: glassColor,
-             normalMap: glassNormal,
-             displacementMap: glassDisplacement,
-             displacementScale: 0.05,
-             roughnessMap: glassRoughness,
-             roughness: 0.5,  
-         });*/
-
-        /*const marbleColor = new THREE.TextureLoader().load('Textures/Marble/marbleColor.png');
-        const marbleDisplacement = new THREE.TextureLoader().load('Textures/Marble/marbleDisplacement.png');
-        const marbleNormal = new THREE.TextureLoader().load('Textures/Marble/marbleNormal.png');
-        const marbleRoughness = new THREE.TextureLoader().load('Textures/Marble/marbleRoughness.png');
-         
-        var blackTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x303030),
-             map: marbleColor,
-             normalMap: marbleNormal,
-             displacementMap: marbleDisplacement,
-             displacementScale: 0.0001,
-             roughnessMap:marbleRoughness,
-             roughness: 0.1,
-             
-         });
- 
-         var whiteTileMaterial = new THREE.MeshStandardMaterial({
-             color: new THREE.Color(0x8f8f8f),
-             map: marbleColor,
-             normalMap: marbleNormal,
-             displacementMap: marbleDisplacement,
-             displacementScale: 0.0001,
-             roughnessMap: marbleRoughness,
-             roughness: 0.1,  
-         }); */
 
         let skyboxGeo;
 
