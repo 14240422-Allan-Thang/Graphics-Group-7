@@ -378,6 +378,8 @@
             // let displacement = textureLoader.load(`Textures/${folder}/basecolor.jpg`);
         }
 
+         
+
         let skyboxGeo;
 
         function init() {
@@ -404,19 +406,6 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
             });
-
-            
-            // cloudy skybox
-            var cloudyskybox = new THREE.CubeTextureLoader().load([
-                "Skybox/Cloudy/bluecloud_bk.jpg",
-                "Skybox/Cloudy/bluecloud_dn.jpg",
-                "Skybox/Cloudy/bluecloud_ft.jpg",
-                "Skybox/Cloudy/bluecloud_lf.jpg",
-                "Skybox/Cloudy/bluecloud_rt.jpg",
-                "Skybox/Cloudy/bluecloud_up.jpg"
-            ])
-            scene.background = cloudyskybox;
-
 
             // ambient light
             const color = 0xFFFFFF;
@@ -453,7 +442,7 @@
 
             const folderbackground = gui.addFolder("Background");
             var stringList = ["One", "Two", "Three"];
-            folderbackground.add(parameters, 'v', stringList).name('Skyboxes');
+            folderbackground.add(parameters, 'v', stringList).name('Backgrounds');
 
             const folderTextures = gui.addFolder("Textures");
 
