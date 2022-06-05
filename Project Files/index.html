@@ -41,9 +41,6 @@
         }
     </style>
 
-    <button id="info" onclick="PlaySound()">Click Me</button>
-    <!-- <div><button id="info" onclick="">Play</button></div> -->
-
     <p id="TextBox"></p>
 
     <script>
@@ -62,8 +59,6 @@
         let loader = new THREE.GLTFLoader();
         let material = new THREE.MeshPhongMaterial({ color: 0x55B663 });
         var board, game_group;
-        var whiteTakenPieces = new TakenPieces('W');
-        var blackTakenPieces = new TakenPieces('B');
 
         var blackPieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x303030) });
         var whitePieceMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color(0x8f8f8f) });
@@ -278,6 +273,8 @@
 
 
         let skyboxGeo;
+        var whiteTakenPieces = new TakenPieces('W');
+        var blackTakenPieces = new TakenPieces('B');
 
         function init() {
 
