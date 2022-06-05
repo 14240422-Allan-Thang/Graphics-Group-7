@@ -304,7 +304,7 @@
         {
             const loader = new THREE.CubeTextureLoader();
             switch (selectSkybox){
-                case "cloudy":
+                case "Cloudy":
                     var skybox = loader.load([
                         'Skybox/Cloudy/bluecloud_bk.jpg',
                         'Skybox/Cloudy/bluecloud_dn.jpg',
@@ -315,7 +315,7 @@
                     ]);
                     break;
                 
-                case 'interstellar':
+                case 'Interstellar':
                     var skybox = loader.load([
                         'Skybox/Interstellar/interstellar_bk.png',
                         'Skybox/Interstellar/interstellar_dn.png',
@@ -325,7 +325,7 @@
                         'Skybox/Interstellar/interstellar_up.png'
                     ]);
                     break;
-                case 'space':
+                case 'Space':
                     var skybox = loader.load([
                         'Skybox/Space/space_bk.png',
                         'Skybox/Space/space_dn.png',
@@ -335,7 +335,7 @@
                         'Skybox/Space/space_up.png'
                     ]);
                     break;
-                case 'sunset':
+                case 'Sunset':
                     var skybox = loader.load([
                         'Skybox/Sunset/yellowcloud_bk.jpg',
                         'Skybox/Sunset/yellowcloud_dn.jpg',
@@ -419,7 +419,7 @@
 
 
             const folderbackground = gui.addFolder("Skybox");
-            var selectedSkybox = folderbackground.add(data, 'background', ['Select','cloudy', 'interstellar', 'space', 'sunset']).name("Skybox");
+            var selectedSkybox = folderbackground.add(data, 'background', ['Select','Cloudy', 'Interstellar', 'Space', 'Sunset']).name("Skybox");
 
             selectedSkybox.onChange(function(temp){
                 addSkybox(temp);
