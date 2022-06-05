@@ -1,3 +1,6 @@
+/* Allan
+    Split the string at whitespaces to return an array.
+*/
 function StorePGN(pgn) {
     // "1. e4 Nf6 2. f3 e5" becomes [1., e4, Nf6, 2., f3, e5]
     var moveArray;
