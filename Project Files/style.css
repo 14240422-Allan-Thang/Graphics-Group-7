@@ -1,0 +1,123 @@
+#TextBox {
+    visibility: hidden;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+    font-size: 50px;
+    color: #000;
+    background: white;
+}
+
+.dropbtn {
+    background-color: #3498DB;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    position:absolute;
+    z-index:5;
+}
+
+/* Dropdown button on hover & focus */
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #2980B9;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position:relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.show {display:block;}
+
+.button-corner {
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    padding: 50px 50px;
+}
+
+.play-class{
+    background-color: #000000f0;
+    color: rgb(255, 255, 255);
+    font-size: 50px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    margin: 6;
+    top: 7%;
+    right: 0%;
+    /* z-index: 5; */
+    text-align: center;
+    padding: 64px 99px;
+}
+
+.game-button{
+    font-size: 25px;
+    padding: 21px 64px;
+    margin: 8px;
+    width: 355px;
+    height: 100px;
+}
+
+.container{
+    visibility: visible;
+    padding: 0px 0px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.title-header{
+    color:rgb(0, 0, 0);
+    font-size: 20px;
+    background: rgb(238, 238, 238);
+    padding: 0px 16px;
+    width:130px;
+    top: 10%;
+}
+
+.text-instruction{
+    position: fixed;
+    color: rgb(0, 0, 0);
+    font-size: 15px;
+    background: rgb(216, 216, 216);
+    bottom: 50px;
+    height: 120px;
+    width: 426px;
+    padding: 3px 5px;
+}
+
+.reset-button{
+    font-size: 20px;
+}
