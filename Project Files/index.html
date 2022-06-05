@@ -1007,7 +1007,7 @@
                     // if you are in bounds, search in that direction for the 
                     if (endRank != 8) pieceToReturn = SearchN(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endFile != 'h' && endRank != 8) pieceToReturn = SearchNE(type, colour, endFile, endRank, mult);
-                    if (!pieceToReturn && endRank != 8) pieceToReturn = SearchE(type, colour, endFile, endRank, mult);
+                    if (!pieceToReturn && endFile != 'h') pieceToReturn = SearchE(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endFile != 'h' && endRank != 1) pieceToReturn = SearchSE(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endRank != 1) pieceToReturn = SearchS(type, colour, endFile, endRank, mult);
                     if (!pieceToReturn && endFile != 'a' && endRank != 1) pieceToReturn = SearchSW(type, colour, endFile, endRank, mult);
