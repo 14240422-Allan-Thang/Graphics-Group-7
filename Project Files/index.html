@@ -398,8 +398,8 @@
 
             var temp;
             var data = {
-                background: "cloudy",
-                presetLighting: false
+                background: "Select"
+                
             }
 
             // light intensity slider
@@ -418,8 +418,8 @@
             folderboard.addColor(new ColorGUIHelper(whiteTileMaterial, 'color'), 'value').name('WhiteTile');
 
 
-            const folderbackground = gui.addFolder("Background");
-            var selectedSkybox = folderbackground.add(data, 'background', ['cloudy', 'interstellar', 'space', 'sunset']).name("Backgrounds");
+            const folderbackground = gui.addFolder("Skybox");
+            var selectedSkybox = folderbackground.add(data, 'background', ['Select','cloudy', 'interstellar', 'space', 'sunset']).name("Skybox");
 
             selectedSkybox.onChange(function(temp){
                 addSkybox(temp);
